@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CARAPACE CLASH // ARTHROPOD OS</title>
+<title>CARAPACE CLASH // TERMINAL OS</title>
 <style>
   :root {
     --bg: #090d13;
@@ -31,7 +31,7 @@
   }
   #terminal {
     width: 100%;
-    max-width: 800px;
+    max-width: 840px;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 4px;
@@ -44,14 +44,35 @@
   .header-bar {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     border-bottom: 1px dashed var(--border);
     padding-bottom: 8px;
     font-weight: bold;
     color: var(--amber);
   }
+  .header-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .god-btn {
+    background: #221217;
+    border: 1px solid var(--red);
+    color: var(--red);
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 8px;
+    cursor: pointer;
+  }
+  .god-btn.active {
+    background: var(--red);
+    color: #fff;
+    box-shadow: 0 0 8px rgba(248, 81, 73, 0.6);
+  }
   .nav-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 6px;
   }
   .nav-btn {
@@ -66,10 +87,7 @@
     font-weight: bold;
     text-transform: uppercase;
   }
-  .nav-btn:hover {
-    color: #fff;
-    border-color: var(--cyan);
-  }
+  .nav-btn:hover { color: #fff; border-color: var(--cyan); }
   .nav-btn.active {
     background: var(--panel);
     color: var(--cyan);
@@ -155,7 +173,7 @@
     margin-top: 2px;
   }
   .scroll-container {
-    max-height: 400px;
+    max-height: 420px;
     overflow-y: auto;
     background: var(--bg);
     border: 1px solid var(--border);
@@ -176,21 +194,20 @@
   }
   .item-actions {
     display: flex;
-    gap: 6px;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
   .mini-btn {
     background: #0d121a;
     border: 1px solid var(--border);
     color: var(--text);
     font-family: inherit;
-    font-size: 11px;
-    padding: 5px 8px;
+    font-size: 10px;
+    padding: 4px 6px;
     cursor: pointer;
   }
-  .mini-btn:hover {
-    border-color: var(--cyan);
-    color: #fff;
-  }
+  .mini-btn:hover { border-color: var(--cyan); color: #fff; }
   .forge-panel {
     border: 1px solid var(--purple);
     background: #151022;
@@ -212,28 +229,13 @@
     grid-template-columns: 2fr 1fr;
     gap: 8px;
   }
-  select.forge-select {
+  select.terminal-select {
     background: var(--bg);
     border: 1px solid var(--border);
     color: var(--text);
     font-family: inherit;
     font-size: 11px;
     padding: 6px;
-  }
-  .forge-btn {
-    background: #25123d;
-    border: 1px solid var(--purple);
-    color: #e2caff;
-    font-family: inherit;
-    font-weight: bold;
-    font-size: 11px;
-    cursor: pointer;
-    padding: 6px 8px;
-    text-align: center;
-  }
-  .forge-btn:hover {
-    background: #391c5e;
-    color: #fff;
   }
   .sort-bar {
     display: flex;
@@ -244,11 +246,7 @@
     padding: 6px 10px;
     margin-bottom: 8px;
   }
-  .sort-bar span {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-right: 4px;
-  }
+  .sort-bar span { font-size: 11px; color: var(--text-dim); margin-right: 4px; }
   .sort-btn {
     background: transparent;
     border: 1px solid var(--border);
@@ -263,19 +261,19 @@
     color: var(--cyan);
     background: #162235;
   }
-  .arena-card {
-    border: 1px solid var(--border);
-    background: var(--panel);
-    padding: 12px;
+  .auction-slot {
+    border: 1px solid var(--gold);
+    background: #1a180e;
+    padding: 10px;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  .shop-card {
+  .arena-card, .shop-card {
     border: 1px solid var(--border);
     background: var(--panel);
-    padding: 10px;
+    padding: 12px;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
@@ -302,19 +300,23 @@
 
 <div id="terminal">
   <div class="header-bar">
-    <span>CARAPACE CLASH // V2.0 - GLADIATOR CIRCUITS</span>
-    <span id="player-status">PITH: 15 | JARS: 5 | LURES: 0</span>
+    <span>CARAPACE CLASH // V2.5</span>
+    <div class="header-controls">
+      <button id="god-mode-btn" class="god-btn" onclick="toggleGodMode()">GOD MODE: OFF</button>
+      <span id="player-status">PITH: 15 | JARS: 5 | LURES: 0</span>
+    </div>
   </div>
 
   <div class="nav-grid">
     <button id="nav-wild" class="nav-btn active" onclick="setTab('wild')">1. THE WILD</button>
     <button id="nav-arena" class="nav-btn" onclick="setTab('arena')">2. ARENA</button>
     <button id="nav-vivarium" class="nav-btn" onclick="setTab('vivarium')">3. VIVARIUM</button>
-    <button id="nav-shop" class="nav-btn" onclick="setTab('shop')">4. DEPOT</button>
-    <button id="nav-guide" class="nav-btn" onclick="setTab('guide')">5. BESTIARY</button>
+    <button id="nav-corner" class="nav-btn" onclick="setTab('corner')">4. AUCTION</button>
+    <button id="nav-shop" class="nav-btn" onclick="setTab('shop')">5. DEPOT</button>
+    <button id="nav-guide" class="nav-btn" onclick="setTab('guide')">6. BESTIARY</button>
   </div>
 
-  <!-- TAB 1: THE WILD (EXPEDITION & CAPTURE) -->
+  <!-- TAB 1: THE WILD -->
   <div id="tab-wild" class="tab-content active-tab">
     <div class="telemetry-grid">
       <div class="unit-card active-player" id="player-card-wild">
@@ -339,11 +341,11 @@
     </div>
   </div>
 
-  <!-- TAB 2: THE ARENA (GLADIATOR COLOSSEUM) -->
+  <!-- TAB 2: THE ARENA -->
   <div id="tab-arena" class="tab-content">
     <div id="arena-menu" style="display:block;">
       <div style="margin-bottom:8px; font-weight:bold; color:var(--amber);">COLOSSEUM CIRCUITS // GLADIATOR DUELS</div>
-      <div class="btn-sub" style="margin-bottom:12px;">Victory yields high Pith purses and an Arena Champion with up to a +500% stat surge. Capture jars are banned in the Arena.</div>
+      <div class="btn-sub" style="margin-bottom:12px;">Victory yields high Pith purses and an Arena Champion with up to a +500% stat surge. Capture jars are prohibited.</div>
       
       <div class="arena-card">
         <div>
@@ -395,18 +397,30 @@
     </div>
   </div>
 
-  <!-- TAB 3: VIVARIUM (ROSTER MANAGER + SORTING + FORGE) -->
+  <!-- TAB 3: VIVARIUM (BREEDING, MOLTING, SORTING) -->
   <div id="tab-vivarium" class="tab-content">
     <div class="forge-panel">
       <div class="forge-title">
+        <span>BIO-ACTIVE BREEDING LAB // MORPH INHERITANCE</span>
+        <span>COST: 15 PITH (INHERITS BEST STATS + MORPH ROLL)</span>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:8px;">
+        <select id="breed-parent-a" class="terminal-select"></select>
+        <select id="breed-parent-b" class="terminal-select"></select>
+        <button class="mini-btn" style="background:#2a1a3a; color:var(--purple); font-weight:bold;" onclick="breedSpecimens()">BREED CLUTCH</button>
+      </div>
+    </div>
+
+    <div class="forge-panel" style="border-color:#3a2c5a; background:#110e1a;">
+      <div class="forge-title" style="color:#d4b3ff;">
         <span>COVETED CARAPACE SPAWN // GENETIC ANOMALY</span>
         <span>MODIFIER: +25% TO +100% STAT MULTIPLIER</span>
       </div>
       <div class="forge-controls">
-        <select id="forge-select" class="forge-select">
+        <select id="forge-select" class="terminal-select">
           <option value="RANDOM">-- ANY RANDOM REAL SPECIMEN --</option>
         </select>
-        <button class="forge-btn" onclick="spawnCovetedCarapace()">SPAWN CARAPACE</button>
+        <button class="mini-btn" style="background:#25123d; color:#e2caff; font-weight:bold;" onclick="spawnCovetedCarapace()">SPAWN CARAPACE</button>
       </div>
     </div>
 
@@ -422,7 +436,24 @@
     <div class="scroll-container" id="vivarium-list"></div>
   </div>
 
-  <!-- TAB 4: DEPOT (SHOP) -->
+  <!-- TAB 4: CARAPACE CORNER (LIVE 15-SECOND AUCTION HOUSE) -->
+  <div id="tab-corner" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div>
+        <strong style="color:var(--gold);">CARAPACE CORNER // LIVE ARTHROPOD AUCTION</strong>
+        <div class="btn-sub">List up to 5 specimens. 15-second bidding frenzy. Multipliers surge from 50% to upwards of 1,000%!</div>
+      </div>
+      <span id="auction-slot-count" style="color:var(--text-dim); font-size:11px;">ACTIVE LISTINGS: 0 / 5</span>
+    </div>
+    
+    <div class="scroll-container" id="auction-container" style="min-height: 200px;">
+      <div id="no-auctions-msg" style="color:var(--text-dim); padding:20px; text-align:center;">
+        No specimens currently listed on the auction block.<br>Go to your <strong style="color:var(--cyan);">VIVARIUM</strong> and click <strong style="color:var(--gold);">AUCTION</strong> on any specimen to launch a listing.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: DEPOT (SHOP) -->
   <div id="tab-shop" class="tab-content">
     <div class="scroll-container">
       <div class="shop-card">
@@ -456,7 +487,7 @@
     </div>
   </div>
 
-  <!-- TAB 5: BESTIARY -->
+  <!-- TAB 6: BESTIARY -->
   <div id="tab-guide" class="tab-content">
     <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
       <span style="font-weight:bold; color:var(--amber);">EXPEDITION FIELD JOURNAL</span>
@@ -471,7 +502,6 @@
 
 <script>
 // --- 310+ AUTHENTIC, LIVING & ENDANGERED ARTHROPODS ---
-// Tuple structure: [Name, Carapace, Agility, Toxicity, HP, Stamina, Tier]
 const RAW_SPECIES = [
   // --- TIER 1: COMMON DETRITIVORES & FIELD INSECTS (50 Species) ---
   ["Pill Woodlouse", 5, 2, 0, 45, 30, 1], ["Zebra Isopod", 4, 4, 0, 42, 35, 1], ["Common Rough Woodlouse", 5, 3, 0, 44, 32, 1],
@@ -495,7 +525,7 @@ const RAW_SPECIES = [
   // --- TIER 2: SUB-BARK STALKERS & WOODLAND HUNTERS (60 Species) ---
   ["Dairy Cow Isopod", 4, 6, 0, 52, 45, 2], ["Devil's Coach Horse", 4, 6, 3, 50, 45, 2], ["Wolf Spider", 3, 8, 4, 48, 50, 2],
   ["Striped Bark Scorpion", 5, 5, 6, 46, 50, 2], ["European Mantis", 3, 7, 0, 55, 55, 2], ["Jerusalem Cricket", 6, 4, 0, 60, 40, 2],
-  ["Antlion Larva", 5, 2, 3, 50, 40, 2], ["Lesser Stag Beetle", 8, 3, 0, 65, 35, 2], ["Bold Jumping Spider", 2, 10, 3, 45, 60, 2],
+  ["Antlion Larva", 5, 2, 3, 50, 40, 2], ["Stag Beetle", 8, 3, 0, 65, 35, 2], ["Bold Jumping Spider", 2, 10, 3, 45, 60, 2],
   ["European Paper Wasp", 3, 8, 5, 42, 55, 2], ["Black Carpenter Ant", 4, 6, 2, 48, 50, 2], ["North American Millipede", 7, 2, 4, 70, 30, 2],
   ["Camel Cricket", 3, 8, 0, 50, 60, 2], ["Brown Marmorated Stink Bug", 6, 3, 3, 55, 35, 2], ["Tiger Beetle", 5, 9, 0, 52, 55, 2],
   ["Crab Spider", 3, 7, 4, 46, 48, 2], ["Giant Water Scavenger", 7, 4, 0, 62, 40, 2], ["Six-Spotted Tiger Beetle", 4, 10, 0, 48, 55, 2],
@@ -514,7 +544,7 @@ const RAW_SPECIES = [
   ["Oak Pruner Anelaphus", 5, 5, 0, 50, 44, 2], ["Grapevine Beetle", 7, 4, 0, 62, 42, 2], ["Goldsmith Beetle", 7, 5, 0, 60, 44, 2],
   ["Hermit Flower Beetle", 8, 4, 0, 68, 40, 2], ["Green June Beetle", 7, 6, 0, 62, 48, 2], ["Japanese Beetle Popillia", 6, 5, 0, 50, 44, 2],
 
-  // --- TIER 3: VENOMOUS STRIKER & HEAVY CHITIN (65 Species) ---
+  // --- TIER 3: VENOMOUS STRIKERS & HEAVY CHITIN (65 Species) ---
   ["Yellow Spotted Isopod", 7, 4, 0, 68, 50, 3], ["Red Velvet Ant", 8, 6, 7, 60, 55, 3], ["North American Wheel Bug", 6, 5, 8, 62, 50, 3],
   ["Trapdoor Spider", 5, 7, 5, 65, 55, 3], ["Southern Black Widow", 2, 7, 11, 50, 60, 3], ["Camel Spider Galeodes", 4, 9, 0, 70, 65, 3],
   ["Japanese Giant Hornet", 5, 8, 9, 68, 70, 3], ["Eastern Rhinoceros Beetle", 11, 2, 0, 85, 45, 3], ["Tarantula Hawk Wasp", 6, 9, 12, 60, 75, 3],
@@ -627,42 +657,60 @@ const RAW_SPECIES = [
   ["Megasoma Actaeon Black Armor Behemoth", 19, 3, 0, 245, 80, 6]
 ];
 
-// Reconstruct full species objects
 const SPECIES_DB = RAW_SPECIES.map(([name, car, agi, tox, hp, sta, tier]) => ({
   name, car, agi, tox, hp, sta, tier
 }));
 
-// --- GAME STATE ---
+const MORPH_TIERS = [
+  { name: "Wild-Type", mult: 1.0, color: "var(--text)" },
+  { name: "High-Yellow", mult: 1.5, color: "var(--amber)" },
+  { name: "Melanistic", mult: 2.0, color: "#8b949e" },
+  { name: "Piebald", mult: 2.8, color: "var(--cyan)" },
+  { name: "Albino", mult: 4.0, color: "#ffffff" },
+  { name: "Ghost", mult: 6.5, color: "var(--purple)" }
+];
+
+const BIDDER_NAMES = [
+  "TokyoExotics", "BioCorp_7", "IsopodKing", "ArachnoPhile", "Dr_Chitin",
+  "TerraCollector", "VenomVault", "IsopodBaron", "KyotoBreeder", "SilkenWeb_VIP"
+];
+
 let state = {
   pith: 15,
-  jars: 25,
-  proJars: 10,
-  lures: 50,
+  jars: 5,
+  proJars: 0,
+  lures: 0,
+  godMode: false,
   inCombat: false,
-  combatMode: 'wild', // 'wild' or 'arena'
+  combatMode: 'wild',
   active: null,
   wild: null,
   arenaOpponent: null,
   arenaDivision: 1,
   roster: [],
   discovered: {},
-  sortMode: 'value'
+  sortMode: 'value',
+  auctions: []
 };
 
-// --- MATHEMATICAL VALUE EVALUATION ---
+function uid() {
+  return 'u_' + Math.random().toString(36).substr(2, 9);
+}
+
 function getSpecimenValue(unit) {
   const tierBase = [0, 8, 20, 50, 120, 300, 850][unit.tier || 1];
   const statSum = (unit.maxHp * 0.25) + (unit.maxSta * 0.15) + (unit.car * 2.5) + (unit.tox * 3.5) + (unit.agi * 2.0);
   const buffMult = 1 + ((unit.buff || 0) / 100);
+  const morphObj = MORPH_TIERS.find(m => m.name === unit.morph) || { mult: 1.0 };
+  const instarMult = 1 + ((unit.instar - 1) * 0.25);
   const champMult = unit.isChampion ? 1.5 : 1.0;
-  return Math.max(5, Math.round((tierBase + statSum) * buffMult * champMult));
+  return Math.max(5, Math.round((tierBase + statSum) * buffMult * morphObj.mult * instarMult * champMult));
 }
 
 function getSpecimenTotalStats(unit) {
   return unit.maxHp + unit.maxSta + unit.car + unit.tox + unit.agi;
 }
 
-// --- TERMINAL METERS & LOGGING ---
 function makeBar(cur, max) {
   const size = 10;
   const pct = Math.max(0, Math.min(1, cur / max));
@@ -681,17 +729,48 @@ function writeLog(msg, type = "normal") {
 
 function createUnit(template) {
   return {
+    id: uid(),
     ...template,
     maxHp: template.hp,
     curHp: template.hp,
     maxSta: template.sta,
     curSta: template.sta,
+    instar: 1,
+    morph: "Wild-Type",
     venomTicks: 0,
     fortified: 0
   };
 }
 
-// --- FORGE SELECT POPULATION ---
+function toggleGodMode() {
+  state.godMode = !state.godMode;
+  const btn = document.getElementById("god-mode-btn");
+  if (state.godMode) {
+    btn.textContent = "GOD MODE: ON";
+    btn.classList.add("active");
+    state.pith = 999999;
+    state.jars = 999;
+    state.proJars = 999;
+    state.lures = 999;
+    if (state.active) {
+      state.active.maxHp = 9999;
+      state.active.curHp = 9999;
+      state.active.maxSta = 9999;
+      state.active.curSta = 9999;
+      state.active.car = 999;
+      state.active.tox = 999;
+      state.active.agi = 999;
+    }
+    writeLog("GOD MODE ENGAGED: Infinite Bio-Pith, 100% Jar Traps, and Overclocked Chitin!", "gold");
+  } else {
+    btn.textContent = "GOD MODE: OFF";
+    btn.classList.remove("active");
+    state.pith = 500;
+    writeLog("GOD MODE DISENGAGED: Systems restored to standard biological baseline.", "alert");
+  }
+  updateUI();
+}
+
 function populateForgeSelect() {
   const select = document.getElementById("forge-select");
   select.innerHTML = '<option value="RANDOM">-- ANY RANDOM REAL SPECIMEN --</option>';
@@ -710,7 +789,28 @@ function populateForgeSelect() {
   }
 }
 
-// --- NAVIGATION TABS ---
+function populateBreedingSelects() {
+  const a = document.getElementById("breed-parent-a");
+  const b = document.getElementById("breed-parent-b");
+  if (!a || !b) return;
+
+  a.innerHTML = '';
+  b.innerHTML = '';
+
+  state.roster.forEach(u => {
+    const optA = document.createElement("option");
+    optA.value = u.id;
+    optA.textContent = `${u.name} (T${u.tier} | Instar ${u.instar})`;
+    a.appendChild(optA);
+
+    const optB = document.createElement("option");
+    optB.value = u.id;
+    optB.textContent = `${u.name} (T${u.tier} | Instar ${u.instar})`;
+    b.appendChild(optB);
+  });
+  if (state.roster.length > 1) b.selectedIndex = 1;
+}
+
 function setTab(tabName) {
   if (state.inCombat) {
     writeLog("ENGAGED IN ACTIVE COMBAT: Complete match or retreat before swapping interfaces.", "crit");
@@ -724,12 +824,15 @@ function setTab(tabName) {
   if (targetContent) targetContent.classList.add('active-tab');
   if (targetNav) targetNav.classList.add('active');
 
-  if (tabName === 'vivarium') renderVivarium();
+  if (tabName === 'vivarium') {
+    populateBreedingSelects();
+    renderVivarium();
+  }
+  if (tabName === 'corner') renderAuctions();
   if (tabName === 'guide') renderBestiary();
   updateUI();
 }
 
-// --- INITIAL ENGINE SETUP ---
 function init() {
   populateForgeSelect();
   const starter = createUnit(SPECIES_DB[0]);
@@ -741,6 +844,7 @@ function init() {
   writeLog("Terminal initialized. 310+ species bio-telemetry synchronized.", "info");
   writeLog(`Assigned baseline companion: ${starter.name}.`, "info");
   setExploreMode();
+  setInterval(processAuctionsTick, 1000);
 }
 
 function setExploreMode() {
@@ -775,7 +879,7 @@ function setCombatMode(mode = 'wild') {
     document.getElementById("btn-wild-3-label").textContent = "CARAPACE SHIELD";
     document.getElementById("btn-wild-3-sub").textContent = "Cost: 10 STA | +Armor buff";
     document.getElementById("btn-wild-4-label").textContent = "DEPLOY JAR";
-    document.getElementById("btn-wild-4-sub").textContent = state.proJars > 0 ? "Using Canister (+30%)" : `Cost: 1 Jar (${state.jars} left)`;
+    document.getElementById("btn-wild-4-sub").textContent = state.godMode ? "God Trap: 100% Rate" : (state.proJars > 0 ? "Using Canister (+30%)" : `Cost: 1 Jar (${state.jars} left)`);
   } else {
     document.getElementById("arena-menu").style.display = "none";
     document.getElementById("arena-battle-view").style.display = "block";
@@ -784,11 +888,10 @@ function setCombatMode(mode = 'wild') {
 }
 
 function updateUI() {
-  document.getElementById("player-status").textContent = `PITH: ${state.pith} | JARS: ${state.jars} | LURES: ${state.lures}`;
+  document.getElementById("player-status").textContent = `PITH: ${state.godMode ? 'INF' : state.pith} | JARS: ${state.jars} | LURES: ${state.lures}`;
 
   const a = state.active;
   if (a) {
-    // Wild cards
     document.getElementById("player-name-wild").textContent = a.name;
     document.getElementById("player-hp-meter-wild").textContent = makeBar(a.curHp, a.maxHp);
     document.getElementById("player-hp-num-wild").textContent = `${a.curHp}/${a.maxHp}`;
@@ -798,7 +901,6 @@ function updateUI() {
     document.getElementById("player-tox-wild").textContent = a.tox;
     document.getElementById("player-agi-wild").textContent = a.agi;
 
-    // Arena cards
     document.getElementById("player-name-arena").textContent = a.name;
     document.getElementById("player-hp-meter-arena").textContent = makeBar(a.curHp, a.maxHp);
     document.getElementById("player-hp-num-arena").textContent = `${a.curHp}/${a.maxHp}`;
@@ -809,7 +911,6 @@ function updateUI() {
     document.getElementById("player-agi-arena").textContent = a.agi;
   }
 
-  // Enemy wild card
   const w = state.wild;
   if (w && state.inCombat && state.combatMode === 'wild') {
     document.getElementById("enemy-name-wild").textContent = `[T${w.tier}] WILD ${w.name}`;
@@ -831,7 +932,6 @@ function updateUI() {
     document.getElementById("enemy-agi-wild").textContent = "0";
   }
 
-  // Arena enemy card
   const opp = state.arenaOpponent;
   if (opp && state.inCombat && state.combatMode === 'arena') {
     document.getElementById("enemy-name-arena").textContent = opp.name;
@@ -845,7 +945,6 @@ function updateUI() {
   }
 }
 
-// --- BUTTON ROUTER FOR THE WILD ---
 function handleWildBtn(num) {
   if (!state.inCombat) {
     if (num === 1) startForage();
@@ -875,7 +974,7 @@ function cycleFighter() {
     writeLog("Only 1 specimen in roster. Capture more in the field.", "info");
     return;
   }
-  const curIdx = state.roster.indexOf(state.active);
+  const curIdx = state.roster.findIndex(r => r.id === state.active.id);
   const nextIdx = (curIdx + 1) % state.roster.length;
   state.active = state.roster[nextIdx];
   state.active.fortified = 0;
@@ -884,7 +983,6 @@ function cycleFighter() {
   updateUI();
 }
 
-// --- THE WILD: FORAGING & SPAWNS ---
 function rollTier() {
   if (state.lures > 0) {
     state.lures--;
@@ -927,9 +1025,8 @@ function startForage() {
   setCombatMode('wild');
 }
 
-// --- STAT-SCALED COMBAT ENGINE ---
 function calculateDamage(attacker, defender, basePower) {
-  // Stat scaling: Agility gives slight precision damage, Carapace mitigates asymptotically
+  if (state.godMode && attacker === state.active) return 9999;
   const rawDmg = basePower + Math.floor(attacker.agi * 0.35);
   const effectiveCar = defender.car + defender.fortified;
   const mitigation = 100 / (100 + (effectiveCar * 6));
@@ -937,6 +1034,8 @@ function calculateDamage(attacker, defender, basePower) {
 }
 
 function checkDodge(attacker, defender) {
+  if (state.godMode && defender === state.active) return true;
+  if (state.godMode && attacker === state.active) return false;
   const agiDiff = defender.agi - attacker.agi;
   const dodgeChance = Math.max(0.03, Math.min(0.40, 0.05 + (agiDiff * 0.02)));
   return Math.random() < dodgeChance;
@@ -957,33 +1056,35 @@ function handleCombatAction(num) {
     }
   } 
   else if (num === 2) {
-    if (p.curSta < 15) { writeLog("Stamina depleted!", "crit"); return; }
-    if (p.tox === 0) { writeLog(`${p.name} has no venom glands!`, "crit"); return; }
-    p.curSta -= 15;
+    if (p.curSta < 15 && !state.godMode) { writeLog("Stamina depleted!", "crit"); return; }
+    if (p.tox === 0 && !state.godMode) { writeLog(`${p.name} has no venom glands!`, "crit"); return; }
+    p.curSta = Math.max(0, p.curSta - 15);
     let baseDmg = calculateDamage(p, w, 4 + p.tox);
     w.curHp = Math.max(0, w.curHp - baseDmg);
     w.venomTicks += 2;
     writeLog(`${p.name} injects toxins! Inflicted ${baseDmg} direct dmg and necrotic poison.`, "alert");
   } 
   else if (num === 3) {
-    if (p.curSta < 10) { writeLog("Stamina depleted!", "crit"); return; }
-    p.curSta -= 10;
+    if (p.curSta < 10 && !state.godMode) { writeLog("Stamina depleted!", "crit"); return; }
+    p.curSta = Math.max(0, p.curSta - 10);
     const fortGain = Math.max(3, Math.round(p.car * 0.3));
     p.fortified += fortGain;
     writeLog(`${p.name} fortified chitin plates (+${fortGain} Carapace this match).`, "info");
   } 
   else if (num === 4) {
     let isPro = state.proJars > 0;
-    if (!isPro && state.jars <= 0) {
+    if (!state.godMode && !isPro && state.jars <= 0) {
       writeLog("No capture containers left in pack!", "crit");
       return;
     }
     
-    if (isPro) state.proJars--;
-    else state.jars--;
+    if (!state.godMode) {
+      if (isPro) state.proJars--;
+      else state.jars--;
+    }
 
     let hpRatio = w.curHp / w.maxHp;
-    let escapeRisk = (hpRatio * 0.50) + (w.tier * 0.08) - (isPro ? 0.30 : 0.0);
+    let escapeRisk = state.godMode ? -1 : (hpRatio * 0.50) + (w.tier * 0.08) - (isPro ? 0.30 : 0.0);
 
     if (Math.random() > escapeRisk) {
       writeLog(`SUCCESS! Captured [T${w.tier}] ${w.name}!`, "success");
@@ -994,7 +1095,7 @@ function handleCombatAction(num) {
       state.roster.push(w);
 
       const bounty = Math.round(6 * Math.pow(2.1, w.tier - 1));
-      state.pith += bounty;
+      if (!state.godMode) state.pith += bounty;
       writeLog(`Harvested ${bounty} Pith research grant.`, "success");
       setExploreMode();
       return;
@@ -1003,16 +1104,14 @@ function handleCombatAction(num) {
     }
   }
 
-  // Check Wild Defeat
   if (w.curHp <= 0) {
     const bounty = Math.round(6 * Math.pow(2.1, w.tier - 1));
-    state.pith += bounty;
+    if (!state.godMode) state.pith += bounty;
     writeLog(`Wild [T${w.tier}] ${w.name} collapsed! Earned ${bounty} Pith.`, "success");
     setExploreMode();
     return;
   }
 
-  // Enemy retaliation
   enemyWildTurn();
   updateUI();
 }
@@ -1021,7 +1120,6 @@ function enemyWildTurn() {
   const p = state.active;
   const w = state.wild;
 
-  // Venom DoT
   if (w.venomTicks > 0) {
     const dot = Math.max(2, Math.round(w.tox * 0.75 + 2));
     w.curHp = Math.max(0, w.curHp - dot);
@@ -1029,16 +1127,20 @@ function enemyWildTurn() {
     writeLog(`Venom necrosis burns wild ${w.name} for ${dot} dmg.`, "alert");
     if (w.curHp <= 0) {
       const bounty = Math.round(6 * Math.pow(2.1, w.tier - 1));
-      state.pith += bounty;
+      if (!state.godMode) state.pith += bounty;
       writeLog(`Wild [T${w.tier}] ${w.name} succumbed to venom! Earned ${bounty} Pith.`, "success");
       setExploreMode();
       return;
     }
   }
 
-  // Enemy attack
   if (checkDodge(w, p)) {
     writeLog(`${p.name} skillfully dodged the wild creature's attack!`, "success");
+    return;
+  }
+
+  if (state.godMode) {
+    writeLog(`Wild ${w.name} struck you, but God Mode deflected all damage!`, "info");
     return;
   }
 
@@ -1061,7 +1163,7 @@ function enemyWildTurn() {
   }
 }
 
-// --- THE ARENA: GLADIATOR COLOSSEUM ---
+// --- THE ARENA ---
 function enterArena(division) {
   if (state.active.curHp <= 0) {
     writeLog("Active combatant is incapacitated! Restore health in Vivarium first.", "crit");
@@ -1069,21 +1171,19 @@ function enterArena(division) {
   }
 
   const fee = division === 1 ? 20 : (division === 2 ? 60 : 180);
-  if (state.pith < fee) {
+  if (!state.godMode && state.pith < fee) {
     writeLog(`Insufficient Pith! Circuit entry fee requires ${fee} Pith.`, "crit");
     return;
   }
 
-  state.pith -= fee;
+  if (!state.godMode) state.pith -= fee;
   state.arenaDivision = division;
 
-  // Select opponent tier pool
   let minTier = division === 1 ? 1 : (division === 2 ? 3 : 5);
   let maxTier = division === 1 ? 2 : (division === 2 ? 4 : 6);
   const pool = SPECIES_DB.filter(s => s.tier >= minTier && s.tier <= maxTier);
   const template = pool[Math.floor(Math.random() * pool.length)];
 
-  // Scale gladiator opponent stats (+20% to +50%)
   const scale = 1.2 + (division * 0.15);
   const arenaOpponent = {
     ...template,
@@ -1109,7 +1209,7 @@ function handleArenaCombat(action) {
   const p = state.active;
   const opp = state.arenaOpponent;
 
-  if (action === 1) { // Standard strike
+  if (action === 1) {
     if (checkDodge(p, opp)) {
       writeLog(`Gladiator ${opp.name} rolled under your strike!`, "alert");
     } else {
@@ -1119,25 +1219,25 @@ function handleArenaCombat(action) {
       writeLog(`${p.name} strikes gladiator for ${dmg} damage.`);
     }
   }
-  else if (action === 2) { // Venom
-    if (p.curSta < 15) { writeLog("Stamina depleted!", "crit"); return; }
-    if (p.tox === 0) { writeLog(`${p.name} lacks venom apparatus!`, "crit"); return; }
-    p.curSta -= 15;
+  else if (action === 2) {
+    if (p.curSta < 15 && !state.godMode) { writeLog("Stamina depleted!", "crit"); return; }
+    if (p.tox === 0 && !state.godMode) { writeLog(`${p.name} lacks venom apparatus!`, "crit"); return; }
+    p.curSta = Math.max(0, p.curSta - 15);
     let baseDmg = calculateDamage(p, opp, 5 + p.tox);
     opp.curHp = Math.max(0, opp.curHp - baseDmg);
     opp.venomTicks += 2;
     writeLog(`${p.name} injects concentrated venom! Inflicted ${baseDmg} dmg and poison DoT.`, "alert");
   }
-  else if (action === 3) { // Fortify
-    if (p.curSta < 10) { writeLog("Stamina depleted!", "crit"); return; }
-    p.curSta -= 10;
+  else if (action === 3) {
+    if (p.curSta < 10 && !state.godMode) { writeLog("Stamina depleted!", "crit"); return; }
+    p.curSta = Math.max(0, p.curSta - 10);
     const gain = Math.max(4, Math.round(p.car * 0.35));
     p.fortified += gain;
     writeLog(`${p.name} braces carapace (+${gain} Carapace).`, "info");
   }
-  else if (action === 4) { // Adrenal Burst (1.8x heavy strike)
-    if (p.curSta < 25) { writeLog("Requires 25 Stamina for Adrenal Burst!", "crit"); return; }
-    p.curSta -= 25;
+  else if (action === 4) {
+    if (p.curSta < 25 && !state.godMode) { writeLog("Requires 25 Stamina for Adrenal Burst!", "crit"); return; }
+    p.curSta = Math.max(0, p.curSta - 25);
     if (checkDodge(p, opp)) {
       writeLog(`Gladiator evaded your Adrenal Burst!`, "crit");
     } else {
@@ -1147,18 +1247,15 @@ function handleArenaCombat(action) {
     }
   }
 
-  // Check Arena Victory
   if (opp.curHp <= 0) {
     const purse = state.arenaDivision === 1 ? 80 : (state.arenaDivision === 2 ? 240 : 750);
-    state.pith += purse;
+    if (!state.godMode) state.pith += purse;
 
-    // GENERATE CHAMPION TROPHY BUG (+50% to +500% BOOST)
     const minBoost = state.arenaDivision === 1 ? 50 : (state.arenaDivision === 2 ? 100 : 200);
     const maxBoost = state.arenaDivision === 1 ? 150 : (state.arenaDivision === 2 ? 300 : 500);
     const buffPct = Math.floor(Math.random() * (maxBoost - minBoost + 1)) + minBoost;
     const buffMult = 1 + (buffPct / 100);
 
-    // Pick a real species for the trophy
     const trophyTmpl = SPECIES_DB[Math.floor(Math.random() * SPECIES_DB.length)];
     const trophyBug = {
       ...trophyTmpl,
@@ -1184,7 +1281,6 @@ function handleArenaCombat(action) {
     return;
   }
 
-  // Arena Opponent Turn
   enemyArenaTurn();
   updateUI();
 }
@@ -1199,13 +1295,18 @@ function enemyArenaTurn() {
     opp.venomTicks--;
     writeLog(`Venom seeps into gladiator for ${dot} dmg.`, "alert");
     if (opp.curHp <= 0) {
-      handleArenaCombat(1); // Trigger victory check
+      handleArenaCombat(1);
       return;
     }
   }
 
   if (checkDodge(opp, p)) {
     writeLog(`You evaded the gladiator's ferocious assault!`, "success");
+    return;
+  }
+
+  if (state.godMode) {
+    writeLog(`Gladiator assaulted you, but God Mode absorbed the blow!`, "info");
     return;
   }
 
@@ -1228,7 +1329,105 @@ function enemyArenaTurn() {
   }
 }
 
-// --- COVETED CARAPACE SPAWN (PURE STAT BUFF GENERATOR) ---
+// --- MOLTING MECHANIC (INSTAR MATURATION) ---
+function moltUnit(id) {
+  const u = state.roster.find(r => r.id === id);
+  if (!u) return;
+
+  if (u.instar >= 5) {
+    writeLog(`${u.name} is already at Instar V (Adult Prime)! Shell cannot molt further.`, "info");
+    return;
+  }
+
+  const cost = u.tier * 6 * u.instar;
+  if (!state.godMode && state.pith < cost) {
+    writeLog(`Insufficient Pith for molting substrate! Requires ${cost} Pith.`, "crit");
+    return;
+  }
+
+  if (!state.godMode) state.pith -= cost;
+
+  const successCheck = state.godMode ? 1.0 : 0.85;
+  if (Math.random() < successCheck) {
+    u.instar++;
+    u.maxHp = Math.round(u.maxHp * 1.20);
+    u.curHp = u.maxHp;
+    u.maxSta = Math.round(u.maxSta * 1.20);
+    u.curSta = u.maxSta;
+    u.car = Math.round(u.car * 1.20);
+    if (u.tox > 0) u.tox = Math.round(u.tox * 1.20);
+    u.agi = Math.round(u.agi * 1.20);
+
+    writeLog(`SUCCESSFUL ECDYSIS! ${u.name} shed its exoskeleton and reached Instar ${u.instar}! (+20% All Stats)`, "success");
+  } else {
+    u.curHp = Math.max(1, u.curHp - 15);
+    writeLog(`ECDYSIS COMPLICATION: ${u.name} suffered shell stress during molting! Vitals depleted.`, "crit");
+  }
+
+  renderVivarium();
+  updateUI();
+}
+
+// --- BIO-ACTIVE BREEDING LAB ---
+function breedSpecimens() {
+  const aId = document.getElementById("breed-parent-a").value;
+  const bId = document.getElementById("breed-parent-b").value;
+
+  if (aId === bId) {
+    writeLog("Breeding requires two distinct specimen lineages!", "crit");
+    return;
+  }
+
+  const pA = state.roster.find(r => r.id === aId);
+  const pB = state.roster.find(r => r.id === bId);
+  if (!pA || !pB) return;
+
+  const cost = 15;
+  if (!state.godMode && state.pith < cost) {
+    writeLog(`Insufficient Pith for bioactive breeding setup (Requires ${cost} Pith).`, "crit");
+    return;
+  }
+
+  if (!state.godMode) state.pith -= cost;
+
+  const chosenParent = Math.random() < 0.5 ? pA : pB;
+  const baseTmpl = SPECIES_DB.find(s => s.name === chosenParent.name.replace(/\[.*?\]\s*/g, '')) || SPECIES_DB[0];
+
+  const rollDelta = () => 0.95 + (Math.random() * 0.20); // -5% to +15%
+  const offspring = {
+    name: baseTmpl.name,
+    tier: Math.max(pA.tier || 1, pB.tier || 1),
+    hp: Math.round(Math.max(pA.maxHp, pB.maxHp) * rollDelta()),
+    sta: Math.round(Math.max(pA.maxSta, pB.maxSta) * rollDelta()),
+    car: Math.round(Math.max(pA.car, pB.car) * rollDelta()),
+    tox: Math.round(Math.max(pA.tox, pB.tox) * rollDelta()),
+    agi: Math.round(Math.max(pA.agi, pB.agi) * rollDelta())
+  };
+
+  const morphRoll = Math.random() * 100;
+  let morph = MORPH_TIERS[0].name;
+  if (morphRoll < 2) morph = MORPH_TIERS[5].name;
+  else if (morphRoll < 6) morph = MORPH_TIERS[4].name;
+  else if (morphRoll < 12) morph = MORPH_TIERS[3].name;
+  else if (morphRoll < 20) morph = MORPH_TIERS[2].name;
+  else if (morphRoll < 30) morph = MORPH_TIERS[1].name;
+
+  const childUnit = createUnit(offspring);
+  childUnit.morph = morph;
+  childUnit.name = `[${morph.toUpperCase()}] [T${offspring.tier}] ${offspring.name}`;
+
+  state.roster.push(childUnit);
+  state.discovered[baseTmpl.name] = true;
+
+  writeLog(`BREEDING SUCCESS: Clutch hatched new ${childUnit.name}!`, "legendary");
+  writeLog(`INHERITED ATTRIBUTES: HP:${childUnit.hp} STA:${childUnit.sta} CAR:${childUnit.car} TOX:${childUnit.tox} AGI:${childUnit.agi}`, "info");
+
+  populateBreedingSelects();
+  renderVivarium();
+  updateUI();
+}
+
+// --- COVETED CARAPACE SPAWN ---
 function spawnCovetedCarapace() {
   const select = document.getElementById("forge-select");
   const choice = select.value;
@@ -1242,7 +1441,7 @@ function spawnCovetedCarapace() {
 
   if (!template) return;
 
-  const buffPct = Math.floor(Math.random() * 76) + 25; // +25% to +100%
+  const buffPct = Math.floor(Math.random() * 76) + 25;
   const buffMult = 1 + (buffPct / 100);
 
   const specimen = {
@@ -1264,10 +1463,130 @@ function spawnCovetedCarapace() {
   state.discovered[template.name] = true;
 
   writeLog(`COVETED CARAPACE SPAWNED: ${covetedUnit.name}!`, "legendary");
-  writeLog(`ATTRIBUTES: HP:${covetedUnit.hp} STA:${covetedUnit.sta} CAR:${covetedUnit.car} TOX:${covetedUnit.tox} AGI:${covetedUnit.agi}`, "info");
-
   renderVivarium();
   updateUI();
+}
+
+// --- CARAPACE CORNER (LIVE 15S AUCTIONS) ---
+function listOnCorner(id) {
+  if (state.auctions.length >= 5) {
+    writeLog("Auction block is full! Maximum 5 active listings permitted.", "crit");
+    return;
+  }
+  const idx = state.roster.findIndex(r => r.id === id);
+  if (idx === -1) return;
+
+  const unit = state.roster[idx];
+  if (unit === state.active && state.roster.length <= 1) {
+    writeLog("Cannot auction your last remaining combatant!", "crit");
+    return;
+  }
+
+  state.roster.splice(idx, 1);
+  if (unit === state.active) state.active = state.roster[0];
+
+  const baseVal = getSpecimenValue(unit);
+  const startBid = Math.max(1, Math.round(baseVal * 0.5));
+  const maxMultiplier = 0.5 + (Math.random() * 9.5); // 0.5x up to 10.0x (up to 1,000%!)
+  const targetFinalBid = Math.max(startBid, Math.round(baseVal * maxMultiplier));
+
+  const auction = {
+    id: 'auc_' + Math.random().toString(36).substr(2, 9),
+    unit: unit,
+    baseValue: baseVal,
+    currentBid: startBid,
+    highestBidder: BIDDER_NAMES[Math.floor(Math.random() * BIDDER_NAMES.length)],
+    targetFinalBid: targetFinalBid,
+    timeLeft: 15
+  };
+
+  state.auctions.push(auction);
+  writeLog(`LISTED ON CORNER: ${unit.name} listed with opening bid of ${startBid} Pith!`, "gold");
+
+  renderVivarium();
+  renderAuctions();
+  setTab('corner');
+}
+
+function processAuctionsTick() {
+  if (state.auctions.length === 0) return;
+
+  for (let i = state.auctions.length - 1; i >= 0; i--) {
+    const auc = state.auctions[i];
+    auc.timeLeft--;
+
+    if (auc.timeLeft > 0) {
+      if (Math.random() < 0.75) {
+        const remainingTicks = auc.timeLeft;
+        const bidGap = auc.targetFinalBid - auc.currentBid;
+        const bidIncrement = Math.max(2, Math.round((bidGap / remainingTicks) * (0.6 + Math.random() * 0.8)));
+        auc.currentBid += bidIncrement;
+        auc.highestBidder = BIDDER_NAMES[Math.floor(Math.random() * BIDDER_NAMES.length)];
+      }
+    } else {
+      if (!state.godMode) state.pith += auc.currentBid;
+      const profitPct = Math.round((auc.currentBid / auc.baseValue) * 100);
+      writeLog(`AUCTION HAMMER DOWN! ${auc.unit.name} SOLD to ${auc.highestBidder} for ${auc.currentBid} Pith (${profitPct}% valuation)!`, "gold");
+      state.auctions.splice(i, 1);
+    }
+  }
+
+  renderAuctions();
+  updateUI();
+}
+
+function cashOutAuction(aucId) {
+  const idx = state.auctions.findIndex(a => a.id === aucId);
+  if (idx === -1) return;
+
+  const auc = state.auctions[idx];
+  if (!state.godMode) state.pith += auc.currentBid;
+  const profitPct = Math.round((auc.currentBid / auc.baseValue) * 100);
+  writeLog(`EARLY CASHOUT ACCEPTED: ${auc.unit.name} sold to ${auc.highestBidder} for ${auc.currentBid} Pith (${profitPct}%)!`, "success");
+
+  state.auctions.splice(idx, 1);
+  renderAuctions();
+  updateUI();
+}
+
+function renderAuctions() {
+  const container = document.getElementById("auction-container");
+  const countEl = document.getElementById("auction-slot-count");
+  if (!container) return;
+
+  countEl.textContent = `ACTIVE LISTINGS: ${state.auctions.length} / 5`;
+
+  if (state.auctions.length === 0) {
+    container.innerHTML = `
+      <div id="no-auctions-msg" style="color:var(--text-dim); padding:20px; text-align:center;">
+        No specimens currently listed on the auction block.<br>Go to your <strong style="color:var(--cyan);">VIVARIUM</strong> and click <strong style="color:var(--gold);">AUCTION</strong> on any specimen to launch a listing.
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = "";
+  state.auctions.forEach(auc => {
+    const mult = (auc.currentBid / auc.baseValue).toFixed(2);
+    const div = document.createElement("div");
+    div.className = "auction-slot";
+    div.innerHTML = `
+      <div>
+        <strong style="color:var(--gold);">${auc.unit.name}</strong>
+        <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">
+          BASE VAL: ${auc.baseValue} P | TIME REMAINING: <span style="color:var(--red); font-weight:bold;">${auc.timeLeft}s</span>
+        </div>
+        <div style="font-size:12px; color:#fff; margin-top:4px;">
+          HIGH BID: <span style="color:var(--gold); font-weight:bold; font-size:14px;">${auc.currentBid} P</span> (${mult}x) by <span style="color:var(--cyan);">${auc.highestBidder}</span>
+        </div>
+      </div>
+      <div>
+        <button class="mini-btn" style="background:#2d260f; border-color:var(--gold); color:var(--gold); font-weight:bold; padding:8px 12px;" onclick="cashOutAuction('${auc.id}')">
+          CASH OUT NOW (${auc.currentBid}P)
+        </button>
+      </div>
+    `;
+    container.appendChild(div);
+  });
 }
 
 // --- VIVARIUM SORTING & ROSTER MANAGEMENT ---
@@ -1281,9 +1600,9 @@ function setSortMode(mode) {
 
 function renderVivarium() {
   const list = document.getElementById("vivarium-list");
+  if (!list) return;
   list.innerHTML = "";
 
-  // Sort roster dynamically
   let sorted = [...state.roster];
   if (state.sortMode === 'value') {
     sorted.sort((a, b) => getSpecimenValue(b) - getSpecimenValue(a));
@@ -1299,28 +1618,34 @@ function renderVivarium() {
     const isAct = unit === state.active;
     const val = getSpecimenValue(unit);
     const totStats = getSpecimenTotalStats(unit);
+    const morphObj = MORPH_TIERS.find(m => m.name === unit.morph) || { color: "var(--text)" };
+    const moltCost = unit.tier * 6 * unit.instar;
+
     const div = document.createElement("div");
     div.className = `specimen-list-item ${isAct ? 'selected' : ''}`;
     div.innerHTML = `
       <div>
-        <strong style="color:${unit.isChampion ? 'var(--gold)' : (unit.coveted ? 'var(--purple)' : 'var(--text)')};">${unit.name}</strong> 
+        <strong style="color:${unit.isChampion ? 'var(--gold)' : morphObj.color};">${unit.name}</strong> 
         ${isAct ? '<span style="color:var(--cyan);">[ACTIVE]</span>' : ''}
+        <span style="color:var(--amber); font-size:10px;">[INSTAR ${unit.instar}]</span>
         <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">
           VAL: <span style="color:var(--gold); font-weight:bold;">${val} P</span> | STATS: ${totStats} (HP:${unit.curHp}/${unit.maxHp} STA:${unit.curSta}/${unit.maxSta} CAR:${unit.car} TOX:${unit.tox} AGI:${unit.agi})
         </div>
       </div>
       <div class="item-actions">
-        ${!isAct ? `<button class="mini-btn" onclick="makeActiveByRef('${unit.name}', ${unit.maxHp},${unit.car})">DEPLOY</button>` : ''}
-        <button class="mini-btn" onclick="healUnitByRef('${unit.name}', ${unit.maxHp})">HEAL (2P)</button>
-        ${state.roster.length > 1 ? `<button class="mini-btn" style="color:var(--red);" onclick="sellUnitByRef('${unit.name}', ${val})">SELL (+${val}P)</button>` : ''}
+        ${!isAct ? `<button class="mini-btn" onclick="makeActive('${unit.id}')">DEPLOY</button>` : ''}
+        ${unit.instar < 5 ? `<button class="mini-btn" style="color:var(--amber);" onclick="moltUnit('${unit.id}')">MOLT (${moltCost}P)</button>` : ''}
+        <button class="mini-btn" onclick="healUnit('${unit.id}')">HEAL (2P)</button>
+        <button class="mini-btn" style="color:var(--gold); border-color:var(--gold);" onclick="listOnCorner('${unit.id}')">AUCTION</button>
+        ${state.roster.length > 1 ? `<button class="mini-btn" style="color:var(--red);" onclick="sellUnit('${unit.id}')">QUICK SELL</button>` : ''}
       </div>
     `;
     list.appendChild(div);
   });
 }
 
-function makeActiveByRef(name, maxHp, car) {
-  const u = state.roster.find(r => r.name === name && r.maxHp === maxHp && r.car === car);
+function makeActive(id) {
+  const u = state.roster.find(r => r.id === id);
   if (u) {
     state.active = u;
     writeLog(`Deployed ${state.active.name} as primary combatant.`, "info");
@@ -1329,18 +1654,18 @@ function makeActiveByRef(name, maxHp, car) {
   }
 }
 
-function healUnitByRef(name, maxHp) {
-  const u = state.roster.find(r => r.name === name && r.maxHp === maxHp);
+function healUnit(id) {
+  const u = state.roster.find(r => r.id === id);
   if (!u) return;
   if (u.curHp === u.maxHp && u.curSta === u.maxSta) {
     writeLog(`${u.name} already at peak condition.`);
     return;
   }
-  if (state.pith < 2) {
+  if (!state.godMode && state.pith < 2) {
     writeLog("Insufficient Pith (requires 2).", "crit");
     return;
   }
-  state.pith -= 2;
+  if (!state.godMode) state.pith -= 2;
   u.curHp = u.maxHp;
   u.curSta = u.maxSta;
   writeLog(`${u.name} restored to full health.`, "success");
@@ -1348,29 +1673,30 @@ function healUnitByRef(name, maxHp) {
   updateUI();
 }
 
-function sellUnitByRef(name, val) {
+function sellUnit(id) {
   if (state.roster.length <= 1) {
     writeLog("Cannot sell your last remaining combatant!", "crit");
     return;
   }
-  const idx = state.roster.findIndex(r => r.name === name);
+  const idx = state.roster.findIndex(r => r.id === id);
   if (idx !== -1) {
     const u = state.roster[idx];
-    state.pith += val;
+    const val = getSpecimenValue(u);
+    if (!state.godMode) state.pith += val;
     state.roster.splice(idx, 1);
     if (u === state.active) state.active = state.roster[0];
-    writeLog(`Sold ${u.name} to biological lab for ${val} Pith.`, "gold");
+    writeLog(`Quick-sold ${u.name} to biological lab for ${val} Pith.`, "gold");
     renderVivarium();
     updateUI();
   }
 }
 
 function restAllSpecimens() {
-  if (state.pith < 15) {
+  if (!state.godMode && state.pith < 15) {
     writeLog("Requires 15 Pith to treat entire vivarium.", "crit");
     return;
   }
-  state.pith -= 15;
+  if (!state.godMode) state.pith -= 15;
   state.roster.forEach(u => {
     u.curHp = u.maxHp;
     u.curSta = u.maxSta;
@@ -1380,13 +1706,12 @@ function restAllSpecimens() {
   updateUI();
 }
 
-// --- DEPOT SHOP ---
 function buyItem(type, cost) {
-  if (state.pith < cost) {
+  if (!state.godMode && state.pith < cost) {
     writeLog(`Insufficient Pith. Requires ${cost} Pith.`, "crit");
     return;
   }
-  state.pith -= cost;
+  if (!state.godMode) state.pith -= cost;
   if (type === 'jar') {
     state.jars++;
     writeLog(`Purchased Standard Specimen Jar.`, "info");
@@ -1403,9 +1728,9 @@ function buyItem(type, cost) {
   updateUI();
 }
 
-// --- BESTIARY FIELD GUIDE (310+ ENTRIES) ---
 function renderBestiary() {
   const container = document.getElementById("bestiary-list");
+  if (!container) return;
   container.innerHTML = "";
   
   const discoveredCount = Object.keys(state.discovered).length;
