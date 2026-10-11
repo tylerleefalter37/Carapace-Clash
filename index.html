@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARAPACE CLASH // ARTHROPOD OS</title>
+<style>
+  :root {
+    --bg: #090d13;
+    --panel: #131922;
+    --border: #2c384b;
+    --text: #c5d1de;
+    --text-dim: #768390;
+    --green: #3fb950;
+    --amber: #d29922;
+    --red: #f85149;
+    --cyan: #58a6ff;
+    --purple: #bc8cff;
+    --gold: #f1e05a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: "Courier New", Courier, monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+  }
+  #terminal {
+    width: 100%;
+    max-width: 800px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+  }
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed var(--border);
+    padding-bottom: 8px;
+    font-weight: bold;
+    color: var(--amber);
+  }
+  .nav-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+  }
+  .nav-btn {
+    background: #0d121a;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .nav-btn:hover {
+    color: #fff;
+    border-color: var(--cyan);
+  }
+  .nav-btn.active {
+    background: var(--panel);
+    color: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: inset 0 -2px 0 var(--cyan);
+  }
+  .tab-content { display: none; }
+  .tab-content.active-tab { display: block; }
+  .telemetry-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .unit-card {
+    border: 1px solid var(--border);
+    padding: 10px;
+    background: var(--bg);
+  }
+  .unit-card.active-player {
+    border-color: var(--cyan);
+    box-shadow: inset 0 0 8px rgba(88, 166, 255, 0.15);
+  }
+  .unit-card.active-enemy {
+    border-color: var(--red);
+    box-shadow: inset 0 0 8px rgba(248, 81, 73, 0.15);
+  }
+  .unit-card h3 {
+    margin-bottom: 6px;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  .bar-row { margin: 3px 0; font-size: 12px; }
+  .meter { font-weight: bold; }
+  #log {
+    height: 160px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .log-entry { color: var(--text); }
+  .log-alert { color: var(--amber); }
+  .log-crit { color: var(--red); font-weight: bold; }
+  .log-success { color: var(--green); font-weight: bold; }
+  .log-info { color: var(--cyan); }
+  .log-legendary { color: var(--purple); font-weight: bold; }
+  .log-gold { color: var(--gold); font-weight: bold; }
+  .action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  button.cmd-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 12px;
+    text-align: left;
+    transition: 0.1s;
+  }
+  button.cmd-btn:hover:not(:disabled) {
+    border-color: var(--cyan);
+    background: #182230;
+    color: #fff;
+  }
+  button.cmd-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .btn-sub {
+    font-size: 10px;
+    display: block;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .scroll-container {
+    max-height: 400px;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    padding: 8px;
+  }
+  .specimen-list-item {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .specimen-list-item.selected {
+    border-color: var(--cyan);
+    background: #152233;
+  }
+  .item-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .mini-btn {
+    background: #0d121a;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 5px 8px;
+    cursor: pointer;
+  }
+  .mini-btn:hover {
+    border-color: var(--cyan);
+    color: #fff;
+  }
+  .forge-panel {
+    border: 1px solid var(--purple);
+    background: #151022;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .forge-title {
+    font-weight: bold;
+    color: var(--purple);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .forge-controls {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 8px;
+  }
+  select.forge-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 11px;
+    padding: 6px;
+  }
+  .forge-btn {
+    background: #25123d;
+    border: 1px solid var(--purple);
+    color: #e2caff;
+    font-family: inherit;
+    font-weight: bold;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 6px 8px;
+    text-align: center;
+  }
+  .forge-btn:hover {
+    background: #391c5e;
+    color: #fff;
+  }
+  .sort-bar {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: #0d121a;
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    margin-bottom: 8px;
+  }
+  .sort-bar span {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+  .sort-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 3px 7px;
+    font-family: inherit;
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .sort-btn.active {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: #162235;
+  }
+  .arena-card {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .shop-card {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 10px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .bestiary-row {
+    font-size: 11px;
+    padding: 5px 8px;
+    border-bottom: 1px solid #1c2635;
+    display: flex;
+    justify-content: space-between;
+  }
+  .tier-hdr {
+    padding: 6px 8px;
+    font-weight: bold;
+    color: var(--amber);
+    background: #121924;
+    border-bottom: 1px solid var(--border);
+    margin-top: 6px;
+  }
+</style>
+</head>
+<body>
+
+<div id="terminal">
+  <div class="header-bar">
+    <span>CARAPACE CLASH // V2.0 - GLADIATOR CIRCUITS</span>
+    <span id="player-status">PITH: 15 | JARS: 5 | LURES: 0</span>
+  </div>
+
+  <div class="nav-grid">
+    <button id="nav-wild" class="nav-btn active" onclick="setTab('wild')">1. THE WILD</button>
+    <button id="nav-arena" class="nav-btn" onclick="setTab('arena')">2. ARENA</button>
+    <button id="nav-vivarium" class="nav-btn" onclick="setTab('vivarium')">3. VIVARIUM</button>
+    <button id="nav-shop" class="nav-btn" onclick="setTab('shop')">4. DEPOT</button>
+    <button id="nav-guide" class="nav-btn" onclick="setTab('guide')">5. BESTIARY</button>
+  </div>
+
+  <!-- TAB 1: THE WILD (EXPEDITION & CAPTURE) -->
+  <div id="tab-wild" class="tab-content active-tab">
+    <div class="telemetry-grid">
+      <div class="unit-card active-player" id="player-card-wild">
+        <h3 id="player-name-wild">NO SPECIMEN</h3>
+        <div class="bar-row">HP: <span id="player-hp-meter-wild" class="meter">[----------]</span> <span id="player-hp-num-wild">0/0</span></div>
+        <div class="bar-row">STA: <span id="player-sta-meter-wild" class="meter">[----------]</span> <span id="player-sta-num-wild">0/0</span></div>
+        <div class="bar-row">CAR: <span id="player-car-wild">0</span> | TOX: <span id="player-tox-wild">0</span> | AGI: <span id="player-agi-wild">0</span></div>
+      </div>
+      <div class="unit-card" id="enemy-card-wild">
+        <h3 id="enemy-name-wild">NO TARGET</h3>
+        <div class="bar-row">HP: <span id="enemy-hp-meter-wild" class="meter">[----------]</span> <span id="enemy-hp-num-wild">0/0</span></div>
+        <div class="bar-row">STA: <span id="enemy-sta-meter-wild" class="meter">[----------]</span> <span id="enemy-sta-num-wild">0/0</span></div>
+        <div class="bar-row">CAR: <span id="enemy-car-wild">0</span> | TOX: <span id="enemy-tox-wild">0</span> | AGI: <span id="enemy-agi-wild">0</span></div>
+      </div>
+    </div>
+
+    <div class="action-grid" id="wild-actions">
+      <button class="cmd-btn" id="btn-wild-1" onclick="handleWildBtn(1)"><span id="btn-wild-1-label">FORAGE LITTER</span><span id="btn-wild-1-sub" class="btn-sub">Track wild specimen</span></button>
+      <button class="cmd-btn" id="btn-wild-2" onclick="handleWildBtn(2)"><span id="btn-wild-2-label">REST ACTIVE</span><span id="btn-wild-2-sub" class="btn-sub">Restore HP/STA</span></button>
+      <button class="cmd-btn" id="btn-wild-3" onclick="handleWildBtn(3)"><span id="btn-wild-3-label">BUY JAR (5 PITH)</span><span id="btn-wild-3-sub" class="btn-sub">Standard specimen jar</span></button>
+      <button class="cmd-btn" id="btn-wild-4" onclick="handleWildBtn(4)"><span id="btn-wild-4-label">CYCLE FIGHTER</span><span id="btn-wild-4-sub" class="btn-sub">Swap active unit</span></button>
+    </div>
+  </div>
+
+  <!-- TAB 2: THE ARENA (GLADIATOR COLOSSEUM) -->
+  <div id="tab-arena" class="tab-content">
+    <div id="arena-menu" style="display:block;">
+      <div style="margin-bottom:8px; font-weight:bold; color:var(--amber);">COLOSSEUM CIRCUITS // GLADIATOR DUELS</div>
+      <div class="btn-sub" style="margin-bottom:12px;">Victory yields high Pith purses and an Arena Champion with up to a +500% stat surge. Capture jars are banned in the Arena.</div>
+      
+      <div class="arena-card">
+        <div>
+          <strong style="color:var(--text);">NOVICE CIRCUIT (TIER 1 - 2)</strong>
+          <div class="btn-sub">Entry: 20 Pith | Prize: 80 Pith + Trophy Specimen (+50% to +150% Boost)</div>
+        </div>
+        <button class="mini-btn" onclick="enterArena(1)">ENTER CIRCUIT</button>
+      </div>
+
+      <div class="arena-card">
+        <div>
+          <strong style="color:var(--cyan);">VETERAN CIRCUIT (TIER 3 - 4)</strong>
+          <div class="btn-sub">Entry: 60 Pith | Prize: 240 Pith + Trophy Specimen (+100% to +300% Boost)</div>
+        </div>
+        <button class="mini-btn" onclick="enterArena(2)">ENTER CIRCUIT</button>
+      </div>
+
+      <div class="arena-card">
+        <div>
+          <strong style="color:var(--gold);">APEX COLOSSEUM (TIER 5 - 6)</strong>
+          <div class="btn-sub">Entry: 180 Pith | Prize: 750 Pith + God-Tier Trophy Specimen (+200% to +500% Boost)</div>
+        </div>
+        <button class="mini-btn" onclick="enterArena(3)">ENTER CIRCUIT</button>
+      </div>
+    </div>
+
+    <div id="arena-battle-view" style="display:none;">
+      <div class="telemetry-grid">
+        <div class="unit-card active-player" id="player-card-arena">
+          <h3 id="player-name-arena">NO SPECIMEN</h3>
+          <div class="bar-row">HP: <span id="player-hp-meter-arena" class="meter">[----------]</span> <span id="player-hp-num-arena">0/0</span></div>
+          <div class="bar-row">STA: <span id="player-sta-meter-arena" class="meter">[----------]</span> <span id="player-sta-num-arena">0/0</span></div>
+          <div class="bar-row">CAR: <span id="player-car-arena">0</span> | TOX: <span id="player-tox-arena">0</span> | AGI: <span id="player-agi-arena">0</span></div>
+        </div>
+        <div class="unit-card active-enemy" id="enemy-card-arena">
+          <h3 id="enemy-name-arena">ARENA GLADIATOR</h3>
+          <div class="bar-row">HP: <span id="enemy-hp-meter-arena" class="meter">[----------]</span> <span id="enemy-hp-num-arena">0/0</span></div>
+          <div class="bar-row">STA: <span id="enemy-sta-meter-arena" class="meter">[----------]</span> <span id="enemy-sta-num-arena">0/0</span></div>
+          <div class="bar-row">CAR: <span id="enemy-car-arena">0</span> | TOX: <span id="enemy-tox-arena">0</span> | AGI: <span id="enemy-agi-arena">0</span></div>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        <button class="cmd-btn" onclick="handleArenaCombat(1)"><span>PINCER STRIKE</span><span class="btn-sub">Physical blow (+5 STA)</span></button>
+        <button class="cmd-btn" onclick="handleArenaCombat(2)"><span>VENOM GLAND</span><span class="btn-sub">Cost: 15 STA | Toxic strike</span></button>
+        <button class="cmd-btn" onclick="handleArenaCombat(3)"><span>FORTIFY CARAPACE</span><span class="btn-sub">Cost: 10 STA | Armor buff</span></button>
+        <button class="cmd-btn" onclick="handleArenaCombat(4)"><span>ADRENAL BURST</span><span class="btn-sub">Cost: 25 STA | 1.8x Heavy Strike</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: VIVARIUM (ROSTER MANAGER + SORTING + FORGE) -->
+  <div id="tab-vivarium" class="tab-content">
+    <div class="forge-panel">
+      <div class="forge-title">
+        <span>COVETED CARAPACE SPAWN // GENETIC ANOMALY</span>
+        <span>MODIFIER: +25% TO +100% STAT MULTIPLIER</span>
+      </div>
+      <div class="forge-controls">
+        <select id="forge-select" class="forge-select">
+          <option value="RANDOM">-- ANY RANDOM REAL SPECIMEN --</option>
+        </select>
+        <button class="forge-btn" onclick="spawnCovetedCarapace()">SPAWN CARAPACE</button>
+      </div>
+    </div>
+
+    <div class="sort-bar">
+      <span>SORT ROSTER:</span>
+      <button class="sort-btn active" id="sort-val" onclick="setSortMode('value')">VALUE</button>
+      <button class="sort-btn" id="sort-tier" onclick="setSortMode('tier')">TIER</button>
+      <button class="sort-btn" id="sort-stats" onclick="setSortMode('stats')">TOTAL STATS</button>
+      <button class="sort-btn" id="sort-name" onclick="setSortMode('name')">NAME</button>
+      <button class="mini-btn" style="margin-left:auto;" onclick="restAllSpecimens()">RESTORE ALL (15P)</button>
+    </div>
+
+    <div class="scroll-container" id="vivarium-list"></div>
+  </div>
+
+  <!-- TAB 4: DEPOT (SHOP) -->
+  <div id="tab-shop" class="tab-content">
+    <div class="scroll-container">
+      <div class="shop-card">
+        <div>
+          <strong style="color:var(--text);">STANDARD SPECIMEN JAR</strong>
+          <div class="btn-sub">Glass container with perforated lid. Baseline capture tool.</div>
+        </div>
+        <button class="mini-btn" onclick="buyItem('jar', 5)">5 PITH</button>
+      </div>
+      <div class="shop-card">
+        <div>
+          <strong style="color:var(--cyan);">ACRYLIC TRAP CANISTER</strong>
+          <div class="btn-sub">Pressurized vacuum seal (+30% capture success rate).</div>
+        </div>
+        <button class="mini-btn" onclick="buyItem('proJar', 20)">20 PITH</button>
+      </div>
+      <div class="shop-card">
+        <div>
+          <strong style="color:var(--amber);">PHEROMONE BAIT VIAL</strong>
+          <div class="btn-sub">Guarantees next forage encounter is Tier 3 or higher.</div>
+        </div>
+        <button class="mini-btn" onclick="buyItem('lure', 25)">25 PITH</button>
+      </div>
+      <div class="shop-card">
+        <div>
+          <strong style="color:var(--green);">SPHAGNUM MULCH BEDDING</strong>
+          <div class="btn-sub">Instantly restores all specimen vitals across entire vivarium.</div>
+        </div>
+        <button class="mini-btn" onclick="buyItem('bedding', 15)">15 PITH</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 5: BESTIARY -->
+  <div id="tab-guide" class="tab-content">
+    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+      <span style="font-weight:bold; color:var(--amber);">EXPEDITION FIELD JOURNAL</span>
+      <span id="bestiary-progress" style="color:var(--cyan);">CATALOGED: 0 / 310</span>
+    </div>
+    <div class="scroll-container" id="bestiary-list"></div>
+  </div>
+
+  <!-- TERMINAL TELEMETRY LOG -->
+  <div id="log"></div>
+</div>
+
+<script>
+// --- 310+ AUTHENTIC, LIVING & ENDANGERED ARTHROPODS ---
+// Tuple structure: [Name, Carapace, Agility, Toxicity, HP, Stamina, Tier]
+const RAW_SPECIES = [
+  // --- TIER 1: COMMON DETRITIVORES & FIELD INSECTS (50 Species) ---
+  ["Pill Woodlouse", 5, 2, 0, 45, 30, 1], ["Zebra Isopod", 4, 4, 0, 42, 35, 1], ["Common Rough Woodlouse", 5, 3, 0, 44, 32, 1],
+  ["European Earwig", 3, 5, 1, 38, 35, 1], ["Garden Orb Weaver", 2, 6, 3, 35, 40, 1], ["House Centipede", 1, 9, 2, 30, 50, 1],
+  ["Field Cricket", 2, 7, 0, 40, 45, 1], ["Common Silverfish", 1, 9, 0, 28, 50, 1], ["Green Shield Bug", 5, 3, 2, 44, 30, 1],
+  ["Firebrat", 2, 8, 0, 32, 50, 1], ["Springtail Collembola", 1, 11, 0, 18, 70, 1], ["Banded Wood Snail", 8, 1, 0, 50, 20, 1],
+  ["Common Fruit Fly", 1, 10, 0, 20, 60, 1], ["Boxelder Bug", 3, 4, 1, 36, 35, 1], ["Spitting Spider", 1, 8, 4, 32, 45, 1],
+  ["Crane Fly", 1, 6, 0, 26, 40, 1], ["Common Pillbug", 6, 2, 0, 46, 28, 1], ["Two-Spotted Cricket", 3, 7, 0, 42, 45, 1],
+  ["Cellar Spider", 1, 7, 3, 28, 48, 1], ["Dung Fly", 2, 8, 0, 30, 50, 1], ["Common Pond Skater", 1, 10, 0, 25, 55, 1],
+  ["Wood Cockroach", 3, 7, 0, 40, 40, 1], ["Brown Marmorated Nymph", 4, 4, 1, 38, 35, 1], ["Green Lacewing", 1, 8, 0, 26, 45, 1],
+  ["Soldier Beetle", 3, 6, 1, 35, 40, 1], ["Black Garden Ant", 2, 7, 1, 32, 50, 1], ["Red Pavement Ant", 3, 6, 2, 34, 48, 1],
+  ["Wharf Borer", 3, 5, 0, 36, 38, 1], ["Flour Beetle", 4, 3, 0, 35, 30, 1], ["Cigarette Beetle", 3, 4, 0, 30, 30, 1],
+  ["Carpet Beetle", 4, 3, 0, 32, 30, 1], ["False Widow Spider", 2, 6, 5, 36, 42, 1], ["Nursery Web Spider", 2, 8, 2, 40, 46, 1],
+  ["Lesser Stag Beetle", 6, 4, 0, 48, 34, 1], ["Seven-Spotted Ladybug", 5, 5, 2, 38, 40, 1], ["Click Beetle", 5, 6, 0, 42, 42, 1],
+  ["Barklice Psocid", 1, 7, 0, 22, 45, 1], ["Larder Beetle", 4, 4, 0, 36, 34, 1], ["Red Firebug", 4, 5, 2, 38, 36, 1],
+  ["Squash Bug", 4, 4, 2, 40, 35, 1], ["Tarnished Plant Bug", 3, 6, 1, 32, 42, 1], ["Spittlebug", 4, 6, 0, 35, 45, 1],
+  ["Ground Beetle Amara", 4, 7, 0, 38, 45, 1], ["Rove Beetle Creophilus", 3, 7, 2, 40, 45, 1], ["Harvestman Opiliones", 1, 7, 1, 30, 46, 1],
+  ["Cave Cricket", 3, 8, 0, 42, 55, 1], ["Leafhopper Cicadellid", 2, 9, 0, 28, 50, 1], ["Thrips Physapus", 1, 10, 0, 18, 60, 1],
+  ["Mealworm Darkling Beetle", 5, 3, 0, 44, 30, 1], ["Grain Weevil", 5, 2, 0, 34, 28, 1],
+
+  // --- TIER 2: SUB-BARK STALKERS & WOODLAND HUNTERS (60 Species) ---
+  ["Dairy Cow Isopod", 4, 6, 0, 52, 45, 2], ["Devil's Coach Horse", 4, 6, 3, 50, 45, 2], ["Wolf Spider", 3, 8, 4, 48, 50, 2],
+  ["Striped Bark Scorpion", 5, 5, 6, 46, 50, 2], ["European Mantis", 3, 7, 0, 55, 55, 2], ["Jerusalem Cricket", 6, 4, 0, 60, 40, 2],
+  ["Antlion Larva", 5, 2, 3, 50, 40, 2], ["Lesser Stag Beetle", 8, 3, 0, 65, 35, 2], ["Bold Jumping Spider", 2, 10, 3, 45, 60, 2],
+  ["European Paper Wasp", 3, 8, 5, 42, 55, 2], ["Black Carpenter Ant", 4, 6, 2, 48, 50, 2], ["North American Millipede", 7, 2, 4, 70, 30, 2],
+  ["Camel Cricket", 3, 8, 0, 50, 60, 2], ["Brown Marmorated Stink Bug", 6, 3, 3, 55, 35, 2], ["Tiger Beetle", 5, 9, 0, 52, 55, 2],
+  ["Crab Spider", 3, 7, 4, 46, 48, 2], ["Giant Water Scavenger", 7, 4, 0, 62, 40, 2], ["Six-Spotted Tiger Beetle", 4, 10, 0, 48, 55, 2],
+  ["Fiery Searcher Beetle", 5, 8, 2, 54, 52, 2], ["Pill Millipede", 9, 2, 3, 64, 30, 2], ["Green Lynx Spider", 2, 9, 4, 46, 54, 2],
+  ["Goldenrod Crab Spider", 3, 7, 3, 48, 48, 2], ["Carolina Mantis", 4, 7, 0, 56, 52, 2], ["Zebra Jumping Spider", 2, 11, 2, 42, 62, 2],
+  ["Banded Garden Spider", 4, 6, 4, 50, 48, 2], ["Fishing Spider Dolomedes", 4, 8, 4, 58, 56, 2], ["Velvet Mite Trombidium", 3, 4, 2, 44, 40, 2],
+  ["Hornet Mimic Hoverfly", 3, 10, 0, 42, 60, 2], ["Potter Wasp Eumenes", 4, 8, 5, 46, 52, 2], ["Mud Dauber Wasp", 3, 9, 5, 45, 54, 2],
+  ["Cicada Tibicen", 6, 6, 0, 58, 50, 2], ["Black Blister Beetle", 4, 5, 6, 48, 42, 2], ["Oil Beetle Meloe", 5, 3, 7, 56, 36, 2],
+  ["Eyed Click Beetle", 7, 5, 0, 60, 44, 2], ["Leatherwing Beetle", 4, 6, 2, 46, 46, 2], ["Great Diving Beetle", 6, 6, 2, 58, 50, 2],
+  ["Giant Water Beetle Hydrophilus", 7, 5, 0, 64, 42, 2], ["Mole Cricket Gryllotalpa", 6, 6, 0, 62, 48, 2], ["Broad-Headed Bug", 4, 6, 3, 46, 46, 2],
+  ["Ambush Bug Phymata", 5, 4, 4, 48, 40, 2], ["Thread-Legged Bug", 1, 9, 3, 38, 52, 2], ["Corsair Assassin Bug", 4, 8, 5, 50, 50, 2],
+  ["Masked Hunter Reduvius", 4, 7, 4, 48, 48, 2], ["Cuckoo Wasp Chrysis", 6, 8, 3, 44, 54, 2], ["Ichneumon Wasp", 2, 9, 3, 42, 58, 2],
+  ["Wood Wasp Siricid", 5, 6, 2, 56, 48, 2], ["Pigeon Tremex", 5, 5, 1, 58, 44, 2], ["Bald-Faced Hornet", 4, 8, 6, 50, 56, 2],
+  ["Yellowjacket Vespula", 3, 9, 5, 46, 58, 2], ["European Hornet", 5, 7, 7, 58, 54, 2], ["Broad-Necked Root Borer", 7, 4, 0, 66, 40, 2],
+  ["Pine Sawyer Monochamus", 6, 6, 0, 60, 48, 2], ["Red-Headed Ash Borer", 5, 7, 0, 52, 50, 2], ["Locust Borer Megacyllene", 6, 6, 0, 54, 48, 2],
+  ["Oak Pruner Anelaphus", 5, 5, 0, 50, 44, 2], ["Grapevine Beetle", 7, 4, 0, 62, 42, 2], ["Goldsmith Beetle", 7, 5, 0, 60, 44, 2],
+  ["Hermit Flower Beetle", 8, 4, 0, 68, 40, 2], ["Green June Beetle", 7, 6, 0, 62, 48, 2], ["Japanese Beetle Popillia", 6, 5, 0, 50, 44, 2],
+
+  // --- TIER 3: VENOMOUS STRIKER & HEAVY CHITIN (65 Species) ---
+  ["Yellow Spotted Isopod", 7, 4, 0, 68, 50, 3], ["Red Velvet Ant", 8, 6, 7, 60, 55, 3], ["North American Wheel Bug", 6, 5, 8, 62, 50, 3],
+  ["Trapdoor Spider", 5, 7, 5, 65, 55, 3], ["Southern Black Widow", 2, 7, 11, 50, 60, 3], ["Camel Spider Galeodes", 4, 9, 0, 70, 65, 3],
+  ["Japanese Giant Hornet", 5, 8, 9, 68, 70, 3], ["Eastern Rhinoceros Beetle", 11, 2, 0, 85, 45, 3], ["Tarantula Hawk Wasp", 6, 9, 12, 60, 75, 3],
+  ["Brown Recluse", 2, 8, 13, 45, 65, 3], ["Giant Huntsman Heteropoda", 3, 11, 4, 75, 80, 3], ["Malaysian Dead Leaf Mantis", 4, 9, 0, 65, 70, 3],
+  ["African Mantis Sphodromantis", 5, 8, 0, 72, 65, 3], ["Emerald Cockroach Wasp", 4, 10, 10, 55, 75, 3], ["Arizona Desert Centipede", 4, 9, 9, 68, 70, 3],
+  ["Flat Rock Scorpion", 8, 4, 5, 82, 52, 3], ["White-Eyed Assassin Bug", 6, 7, 8, 66, 60, 3], ["Tailless Whip Scorpion Damon", 4, 10, 0, 65, 75, 3],
+  ["Giant Vinegaroon Mastigoproctus", 7, 6, 4, 78, 60, 3], ["Golden Silk Orb Weaver", 4, 7, 6, 68, 62, 3], ["Banded Bull Ant Myrmecia", 5, 9, 9, 62, 70, 3],
+  ["Red Bull Ant Gulosa", 5, 9, 10, 64, 72, 3], ["Jerdon's Jumping Ant", 4, 10, 7, 56, 74, 3], ["Siafu Driver Ant Dorylus", 5, 8, 6, 68, 68, 3],
+  ["Amazon Army Ant Eciton", 5, 9, 7, 65, 70, 3], ["Giant Forest Ant Camponotus", 6, 7, 5, 72, 62, 3], ["Exploding Ant Colobopsis", 4, 7, 10, 58, 60, 3],
+  ["Asian Weaver Ant Oecophylla", 4, 9, 5, 54, 72, 3], ["Madagascar Hissing Cockroach", 9, 3, 0, 88, 45, 3], ["Giant Cave Cockroach Blaberus", 8, 5, 0, 82, 55, 3],
+  ["White-Spotted Assassin Bug", 5, 8, 8, 62, 64, 3], ["Kissing Bug Triatoma", 4, 8, 7, 58, 62, 3], ["Empress Cicada Megapomponia", 6, 8, 0, 70, 65, 3],
+  ["Lanternfly Pyrops", 6, 7, 0, 64, 60, 3], ["Alligator Bug Fulgora", 7, 6, 0, 72, 58, 3], ["Helicopter Damselfly", 2, 11, 0, 55, 78, 3],
+  ["Eastern Dobsonfly Corydalus", 5, 7, 4, 70, 62, 3], ["Giant Petaltail Dragonfly", 4, 10, 0, 68, 75, 3], ["European Hornet Vespa Crabro", 5, 8, 8, 64, 68, 3],
+  ["Yellow-Legged Hornet Velutina", 5, 9, 8, 62, 72, 3], ["Cow Killer Wasp", 8, 7, 10, 64, 66, 3], ["Cicada Killer Sphecius", 6, 8, 7, 66, 68, 3],
+  ["Thistle Mantis Blepharopsis", 4, 9, 0, 60, 68, 3], ["Conehead Mantis Empusa", 4, 9, 0, 58, 70, 3], ["Jeweled Flower Mantis Creobroter", 4, 10, 0, 60, 72, 3],
+  ["Ghost Mantis Phyllocrania", 4, 10, 0, 56, 74, 3], ["Banded Flower Mantis Theopropus", 4, 9, 0, 62, 70, 3], ["Violin Beetle Mormolyce", 7, 6, 3, 74, 55, 3],
+  ["Six-Spot Ground Beetle Anthia", 7, 8, 5, 72, 64, 3], ["Chinese Tiger Beetle Cicindela", 5, 11, 0, 60, 72, 3], ["Bombardier Beetle Pheropsophus", 6, 8, 8, 62, 65, 3],
+  ["Rainbow Stag Beetle Phalacrognathus", 9, 5, 0, 80, 52, 3], ["Giraffe Stag Beetle Prosopocoilus", 9, 6, 0, 82, 54, 3], ["Atlas Stag Beetle Dorcus", 10, 4, 0, 86, 50, 3],
+  ["Sawtooth Stag Beetle Lucanus", 9, 5, 0, 80, 52, 3], ["Golden Scarab Chrysina", 9, 6, 0, 76, 56, 3], ["Silver Jewel Scarab", 9, 6, 0, 78, 54, 3],
+  ["Madagascar Rainbow Grasshopper", 6, 6, 9, 74, 58, 3], ["Eastern Lubber Grasshopper", 8, 4, 7, 84, 50, 3], ["Giant Brown Locust Tropidacris", 7, 7, 0, 80, 64, 3],
+  ["Predatory Bush Cricket Saga", 6, 8, 4, 76, 68, 3], ["Giant Neotropical Katydid", 6, 7, 0, 74, 62, 3], ["Great Green Bush Cricket", 5, 8, 0, 68, 66, 3],
+  ["Diving Bell Spider Argyroneta", 3, 9, 6, 60, 70, 3], ["Net-Casting Spider Deinopis", 3, 10, 5, 58, 74, 3],
+
+  // --- TIER 4: LETHAL EXOTICS & RARE TITANS (65 Species) ---
+  ["Sydney Funnel-Web Atrax", 5, 8, 14, 80, 70, 4], ["Deathstalker Scorpion Leiurus", 6, 7, 15, 75, 75, 4], ["Bullet Ant Paraponera", 7, 7, 13, 82, 70, 4],
+  ["Giant Desert Centipede Scolopendra", 5, 10, 12, 90, 80, 4], ["Brazilian Wandering Spider Phoneutria", 4, 10, 16, 78, 85, 4],
+  ["Goliath Beetle Goliathus", 13, 3, 0, 110, 60, 4], ["Giant Robber Fly Promachus", 4, 11, 8, 76, 80, 4], ["Featherleg Baboon Tarantula", 6, 9, 11, 88, 75, 4],
+  ["Malaysian Orchid Mantis Hymenopus", 5, 12, 0, 85, 90, 4], ["Executioner Wasp Polistes Carnifex", 5, 10, 16, 70, 85, 4],
+  ["Cook Strait Giant Weta", 9, 5, 0, 105, 75, 4], ["Spiny Flower Mantis Pseudocreobotra", 6, 11, 0, 82, 85, 4],
+  ["Malaysian Earth Tiger Cyriopagopus", 7, 8, 12, 95, 70, 4], ["Blue-Ringed Land Octopus Mimic", 3, 12, 20, 68, 90, 4],
+  ["African Cave Whip Spider Charinus", 5, 9, 13, 85, 80, 4], ["Yellow Fat-Tailed Scorpion Androctonus", 7, 7, 17, 82, 75, 4],
+  ["Black Fat-Tailed Scorpion", 7, 6, 16, 84, 72, 4], ["Brazilian Yellow Scorpion Tityus", 5, 8, 16, 74, 80, 4],
+  ["Spitting Thicktail Scorpion Parabuthus", 6, 7, 15, 80, 78, 4], ["Indian Red Scorpion Hottentotta", 5, 8, 17, 76, 82, 4],
+  ["Northern Tree Funnel-Web Hadronyche", 6, 8, 15, 84, 76, 4], ["Redback Spider Latrodectus Hasselti", 3, 8, 16, 70, 80, 4],
+  ["Chilean Recluse Loxosceles Laeta", 3, 9, 17, 68, 84, 4], ["Salmon Pink Birdeater Lasiodora", 9, 7, 10, 115, 75, 4],
+  ["Burgundy Goliath Birdeater Stirmi", 9, 6, 11, 120, 72, 4], ["Cobalt Blue Tarantula Cyriopagopus", 7, 10, 14, 95, 85, 4],
+  ["Socotra Island Blue Baboon", 8, 9, 12, 98, 80, 4], ["Golden Blue Leg Baboon Harpactira", 7, 10, 13, 92, 84, 4],
+  ["Antilles Pinktoe Caribena", 5, 11, 8, 86, 92, 4], ["Mexican Redknee Brachypelma", 8, 6, 7, 108, 68, 4],
+  ["Mexican Fireleg Brachypelma Boehmei", 8, 7, 7, 105, 70, 4], ["Suntiger Tarantula Psalmopoeus", 5, 12, 11, 85, 94, 4],
+  ["Giant Baboon Tarantula Hysterocrates", 9, 7, 12, 110, 74, 4], ["King Baboon Spider Pelinobius", 11, 5, 13, 118, 66, 4],
+  ["Gooty Sapphire Tarantula Metallica", 6, 11, 15, 90, 92, 4], ["Indian Ornamental Poecilotheria Regalis", 6, 11, 15, 92, 90, 4],
+  ["Fringed Ornamental Poecilotheria Ornata", 6, 12, 16, 88, 95, 4], ["Giant Burrowing Cockroach Macropanesthia", 12, 2, 0, 130, 50, 4],
+  ["Devil's Flower Mantis Idolomantis", 6, 11, 0, 95, 90, 4], ["Wandering Violin Mantis Gongylus", 5, 11, 0, 88, 88, 4],
+  ["Giant Shield Mantis Rhombodera", 8, 9, 0, 102, 80, 4], ["Giant Asian Mantis Hierodula", 7, 9, 0, 98, 82, 4],
+  ["Chinese Red-Headed Centipede Subspinipes", 6, 11, 14, 96, 90, 4], ["Amphibious Centipede Cataracta", 6, 11, 13, 94, 92, 4],
+  ["Southeast Asian Giant Centipede Dehaani", 7, 10, 15, 102, 88, 4], ["New Zealand Giant Centipede Cormocephalus", 6, 9, 12, 98, 80, 4],
+  ["Australian Giant Centipede Ethmostigmus", 7, 10, 13, 100, 86, 4], ["Warrior Wasp Synoeca", 5, 11, 15, 76, 92, 4],
+  ["Southern Giant Hornet Vespa Soror", 7, 10, 15, 94, 90, 4], ["Black Beauty Stick Insect Peruphasma", 6, 8, 8, 88, 75, 4],
+  ["Fern Stick Insect Oreophoetes", 5, 9, 9, 82, 80, 4], ["Metallic Blue Stick Insect Achrioptera", 7, 8, 0, 98, 76, 4],
+  ["Macleay's Spectre Extatosoma", 9, 5, 0, 112, 65, 4], ["Giant Malaysian Leaf Insect Phyllium", 8, 6, 0, 105, 70, 4],
+  ["Sabertooth Longhorn Macrodontia", 12, 5, 0, 118, 68, 4], ["Elephant Beetle Megasoma Elephas", 14, 3, 0, 128, 55, 4],
+  ["Actaeon Beetle Megasoma Actaeon", 15, 3, 0, 132, 52, 4], ["Atlas Beetle Chalcosoma Atlas", 13, 5, 0, 120, 65, 4],
+  ["Caucasus Beetle Chalcosoma Chiron", 14, 5, 0, 124, 64, 4], ["Neptune Beetle Dynastes Neptunus", 13, 5, 0, 122, 66, 4],
+  ["Madagascan Moon Moth Argema", 4, 11, 0, 85, 90, 4], ["Hercules Moth Coscinocera", 5, 10, 0, 95, 88, 4],
+  ["White Witch Moth Thysania", 4, 12, 0, 90, 95, 4], ["Assassin Caterpillar Lonomia Obliqua", 5, 4, 19, 84, 60, 4],
+  ["Death's-Head Hawkmoth Acherontia", 6, 11, 0, 92, 90, 4],
+
+  // --- TIER 5: APEX GIANTS & LIVING BEHEMOTHS (50 Species) ---
+  ["Goliath Birdeater Theraphosa Blondi", 8, 7, 12, 135, 90, 5], ["Amazonian Giant Centipede Gigantea", 7, 11, 17, 125, 100, 5],
+  ["Giant Water Bug Toe-Biter Lethocerus", 9, 7, 14, 130, 85, 5], ["Titan Beetle Titanus Giganteus", 16, 3, 0, 160, 70, 5],
+  ["Hercules Beetle Dynastes Hercules", 15, 4, 0, 150, 80, 5], ["Six-Eyed Sand Spider Hexophthalma", 5, 8, 20, 100, 85, 5],
+  ["Emperor Scorpion Pandinus Imperator", 12, 5, 8, 140, 80, 5], ["Giant Forest Scorpion Heterometrus Swammerdami", 13, 5, 7, 145, 78, 5],
+  ["Northern Giant Hornet Mandarinia", 8, 10, 16, 120, 100, 5], ["Atlas Moth Attacus Atlas", 4, 12, 12, 110, 110, 5],
+  ["Little Barrier Island Giant Weta Deinacrida", 11, 5, 0, 145, 80, 5], ["Malaysian Giant Jungle Nymph Heteropteryx", 13, 4, 0, 150, 75, 5],
+  ["Giant Katydid Siliquofera Grandis", 9, 8, 0, 135, 90, 5], ["Giant African Millipede Archispirostreptus", 14, 2, 8, 155, 60, 5],
+  ["Giant Centipede Scolopendra Viridicornis", 8, 11, 16, 128, 98, 5], ["Red-Headed Amazon Centipede", 8, 11, 17, 126, 100, 5],
+  ["Rubber Ducky Isopod Cubaris", 8, 8, 0, 115, 90, 5], ["Porcellio Werneri Giant Flat Isopod", 9, 7, 0, 120, 85, 5],
+  ["Porcellio Magnificus Giant Spanish Isopod", 9, 8, 0, 125, 88, 5], ["Giant Spiny Stick Insect Eurycantha", 13, 4, 0, 142, 70, 5],
+  ["Chan's Megastick Phobaeticus Chani", 8, 7, 0, 130, 85, 5], ["Kirby's Megastick Phobaeticus Kirbyi", 8, 7, 0, 128, 86, 5],
+  ["Chinese Giant Stick Insect Phryganistria", 9, 7, 0, 134, 88, 5], ["Giant Shield Mantis Rhombodera Megaera", 9, 9, 0, 125, 92, 5],
+  ["Malaysian Dead Leaf Mantis Lobata", 8, 10, 0, 118, 95, 5], ["Giant Rainforest Mantis Hierodula Majuscula", 8, 10, 0, 120, 94, 5],
+  ["Giant Australian Katydid Pentacentrus", 8, 9, 0, 122, 90, 5], ["Giant Prehistoric Silverfish Mimic", 6, 13, 0, 110, 115, 5],
+  ["Amazonian Bullet Ant Dinoponera Grandis", 9, 8, 15, 124, 90, 5], ["Dinoponera Quadriceps Giant Ant", 9, 8, 14, 122, 92, 5],
+  ["Red-Tailed Bullet Ant Paraponera Clavata", 8, 9, 15, 120, 94, 5], ["Giant Cicada Tacua Speciosa", 8, 9, 0, 115, 95, 5],
+  ["Tosena Paviei Resplendent Cicada", 8, 9, 0, 116, 94, 5], ["Giant Lanternfly Fulgora Candelaria", 9, 8, 0, 124, 88, 5],
+  ["Great Ash Borer Callipogon Relictus", 14, 4, 0, 144, 70, 5], ["Giant Stag Beetle Dorcus Titanus Palawanicus", 15, 5, 0, 148, 75, 5],
+  ["Dorcus Alcides Broad-Horned Stag", 16, 4, 0, 152, 70, 5], ["Hexarthrius Parryi Fighting Stag", 14, 6, 0, 142, 78, 5],
+  ["Odontolabis Alces Giant Bull Stag", 15, 5, 0, 146, 74, 5], ["Megasoma Mars Obsidian Titan Beetle", 16, 3, 0, 158, 68, 5],
+  ["Megasoma Volex Titan Scarab", 15, 4, 0, 154, 70, 5], ["Goliathus Regius Royal Goliath Beetle", 14, 4, 0, 145, 75, 5],
+  ["Goliathus Orientalis Giant Flower Beetle", 13, 5, 0, 140, 78, 5], ["Cheirotonus Jansonii Long-Armed Scarab", 12, 6, 0, 138, 80, 5],
+  ["Euchirus Duponti Long-Arm Beetle", 12, 6, 0, 136, 82, 5], ["Propomacrus Cratea Hellenic Scarab", 13, 5, 0, 140, 78, 5],
+  ["Megaloblatta Longipennis Giant Winged Roach", 8, 10, 0, 122, 100, 5], ["Macropanesthia Rhinoceros King Burrower", 15, 2, 0, 160, 55, 5],
+  ["Deroplatys Truncata Cryptic Shield Mantis", 8, 10, 0, 118, 92, 5], ["Choeradodis Strumaria Leaf-Shield Mantis", 9, 9, 0, 124, 88, 5],
+
+  // --- TIER 6: CRITICALLY ENDANGERED RELICS & APEX ANOMALIES (25 Species) ---
+  ["Lord Howe Island Stick Insect Dryococelus", 17, 5, 6, 195, 95, 6],
+  ["Queen Alexandra's Birdwing Ornithoptera", 6, 14, 10, 160, 130, 6],
+  ["Giant Deep-Sea Isopod Bathynomus Giganteus", 19, 3, 0, 230, 85, 6],
+  ["Wallace's Giant Bee Megachile Pluto", 9, 13, 18, 175, 120, 6],
+  ["Patagonian Giant Bumblebee Bombus Dahlbomii", 10, 12, 16, 170, 115, 6],
+  ["Giant Malaysian Shield Mantis Rhombodera", 13, 11, 0, 185, 110, 6],
+  ["Scolopendra Cataracta Amphibious Titan", 10, 14, 22, 180, 125, 6],
+  ["Little Barrier Weta Wetapunga", 14, 6, 0, 205, 95, 6],
+  ["Giant Cave Huntsman Heteropoda Maxima", 7, 15, 15, 170, 135, 6],
+  ["Six-Eyed Sand Spider Hexophthalma Albospinosa", 7, 10, 26, 165, 110, 6],
+  ["Gooty Sapphire Tarantula Poecilotheria Metallica", 9, 13, 22, 180, 125, 6],
+  ["Theraphosa Blondi Record Goliath Specimen", 11, 9, 18, 210, 105, 6],
+  ["Titanus Giganteus 17cm Primeval Male", 19, 4, 0, 240, 90, 6],
+  ["Dynastes Hercules 180mm Horned Emperor", 18, 5, 0, 235, 95, 6],
+  ["Macrodontia Cervicornis Amazonian Relic", 16, 7, 0, 215, 100, 6],
+  ["Bathynomus Doederleinii Abyssal Isopod", 18, 3, 0, 225, 80, 6],
+  ["Scolopendra Gigantea Black Morph Goliath", 11, 14, 25, 190, 130, 6],
+  ["Phoneutria Nigriventer Apex Wandering Spider", 8, 14, 26, 175, 130, 6],
+  ["Atrax Robustus Sydney Funnel-Web Colossus", 9, 11, 24, 185, 115, 6],
+  ["Androctonus Australis Sahara Black-Claw", 12, 10, 25, 180, 115, 6],
+  ["Leiurus Quinquestriatus Apex Deathstalker", 10, 11, 26, 178, 120, 6],
+  ["Paraponera Clavata Giant Queen Colony-Head", 12, 10, 22, 190, 115, 6],
+  ["Idolomantis Diabolica Grand Empress Mantis", 10, 13, 0, 182, 125, 6],
+  ["Archispirostreptus Gigas 38cm Relic Millipede", 18, 3, 14, 220, 85, 6],
+  ["Megasoma Actaeon Black Armor Behemoth", 19, 3, 0, 245, 80, 6]
+];
+
+// Reconstruct full species objects
+const SPECIES_DB = RAW_SPECIES.map(([name, car, agi, tox, hp, sta, tier]) => ({
+  name, car, agi, tox, hp, sta, tier
+}));
+
+// --- GAME STATE ---
+let state = {
+  pith: 15,
+  jars: 25,
+  proJars: 10,
+  lures: 50,
+  inCombat: false,
+  combatMode: 'wild', // 'wild' or 'arena'
+  active: null,
+  wild: null,
+  arenaOpponent: null,
+  arenaDivision: 1,
+  roster: [],
+  discovered: {},
+  sortMode: 'value'
+};
+
+// --- MATHEMATICAL VALUE EVALUATION ---
+function getSpecimenValue(unit) {
+  const tierBase = [0, 8, 20, 50, 120, 300, 850][unit.tier || 1];
+  const statSum = (unit.maxHp * 0.25) + (unit.maxSta * 0.15) + (unit.car * 2.5) + (unit.tox * 3.5) + (unit.agi * 2.0);
+  const buffMult = 1 + ((unit.buff || 0) / 100);
+  const champMult = unit.isChampion ? 1.5 : 1.0;
+  return Math.max(5, Math.round((tierBase + statSum) * buffMult * champMult));
+}
+
+function getSpecimenTotalStats(unit) {
+  return unit.maxHp + unit.maxSta + unit.car + unit.tox + unit.agi;
+}
+
+// --- TERMINAL METERS & LOGGING ---
+function makeBar(cur, max) {
+  const size = 10;
+  const pct = Math.max(0, Math.min(1, cur / max));
+  const filled = Math.round(pct * size);
+  return `[${"█".repeat(filled)}${"░".repeat(size - filled)}]`;
+}
+
+function writeLog(msg, type = "normal") {
+  const el = document.getElementById("log");
+  const row = document.createElement("div");
+  row.className = `log-entry ${type ? 'log-' + type : ''}`;
+  row.textContent = `> ${msg}`;
+  el.appendChild(row);
+  el.scrollTop = el.scrollHeight;
+}
+
+function createUnit(template) {
+  return {
+    ...template,
+    maxHp: template.hp,
+    curHp: template.hp,
+    maxSta: template.sta,
+    curSta: template.sta,
+    venomTicks: 0,
+    fortified: 0
+  };
+}
+
+// --- FORGE SELECT POPULATION ---
+function populateForgeSelect() {
+  const select = document.getElementById("forge-select");
+  select.innerHTML = '<option value="RANDOM">-- ANY RANDOM REAL SPECIMEN --</option>';
+
+  for (let t = 1; t <= 6; t++) {
+    const group = document.createElement("optgroup");
+    group.label = `Tier ${t} Fauna (${SPECIES_DB.filter(s => s.tier === t).length} Species)`;
+    const pool = SPECIES_DB.filter(s => s.tier === t);
+    pool.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.name;
+      opt.textContent = `[T${s.tier}] ${s.name}`;
+      group.appendChild(opt);
+    });
+    select.appendChild(group);
+  }
+}
+
+// --- NAVIGATION TABS ---
+function setTab(tabName) {
+  if (state.inCombat) {
+    writeLog("ENGAGED IN ACTIVE COMBAT: Complete match or retreat before swapping interfaces.", "crit");
+    return;
+  }
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active-tab'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  
+  const targetContent = document.getElementById('tab-' + tabName);
+  const targetNav = document.getElementById('nav-' + tabName);
+  if (targetContent) targetContent.classList.add('active-tab');
+  if (targetNav) targetNav.classList.add('active');
+
+  if (tabName === 'vivarium') renderVivarium();
+  if (tabName === 'guide') renderBestiary();
+  updateUI();
+}
+
+// --- INITIAL ENGINE SETUP ---
+function init() {
+  populateForgeSelect();
+  const starter = createUnit(SPECIES_DB[0]);
+  starter.name = `[T1] ${starter.name}`;
+  state.active = starter;
+  state.roster.push(starter);
+  state.discovered[SPECIES_DB[0].name] = true;
+
+  writeLog("Terminal initialized. 310+ species bio-telemetry synchronized.", "info");
+  writeLog(`Assigned baseline companion: ${starter.name}.`, "info");
+  setExploreMode();
+}
+
+function setExploreMode() {
+  state.inCombat = false;
+  state.wild = null;
+  state.arenaOpponent = null;
+  document.getElementById("enemy-card-wild").classList.remove("active-enemy");
+  document.getElementById("arena-menu").style.display = "block";
+  document.getElementById("arena-battle-view").style.display = "none";
+  updateUI();
+
+  document.getElementById("btn-wild-1-label").textContent = "FORAGE LITTER";
+  document.getElementById("btn-wild-1-sub").textContent = state.lures > 0 ? "Pheromone active! (Tier 3+)" : "Track wild specimen";
+  document.getElementById("btn-wild-2-label").textContent = "REST ACTIVE";
+  document.getElementById("btn-wild-2-sub").textContent = "Restore HP/STA";
+  document.getElementById("btn-wild-3-label").textContent = "BUY JAR (5 PITH)";
+  document.getElementById("btn-wild-3-sub").textContent = `Stock: ${state.jars}`;
+  document.getElementById("btn-wild-4-label").textContent = "CYCLE FIGHTER";
+  document.getElementById("btn-wild-4-sub").textContent = `Roster size: ${state.roster.length}`;
+}
+
+function setCombatMode(mode = 'wild') {
+  state.inCombat = true;
+  state.combatMode = mode;
+
+  if (mode === 'wild') {
+    document.getElementById("enemy-card-wild").classList.add("active-enemy");
+    document.getElementById("btn-wild-1-label").textContent = "PINCER STRIKE";
+    document.getElementById("btn-wild-1-sub").textContent = "Physical blow (+5 STA)";
+    document.getElementById("btn-wild-2-label").textContent = "VENOM INJECTION";
+    document.getElementById("btn-wild-2-sub").textContent = "Cost: 15 STA | Inflicts DoT";
+    document.getElementById("btn-wild-3-label").textContent = "CARAPACE SHIELD";
+    document.getElementById("btn-wild-3-sub").textContent = "Cost: 10 STA | +Armor buff";
+    document.getElementById("btn-wild-4-label").textContent = "DEPLOY JAR";
+    document.getElementById("btn-wild-4-sub").textContent = state.proJars > 0 ? "Using Canister (+30%)" : `Cost: 1 Jar (${state.jars} left)`;
+  } else {
+    document.getElementById("arena-menu").style.display = "none";
+    document.getElementById("arena-battle-view").style.display = "block";
+  }
+  updateUI();
+}
+
+function updateUI() {
+  document.getElementById("player-status").textContent = `PITH: ${state.pith} | JARS: ${state.jars} | LURES: ${state.lures}`;
+
+  const a = state.active;
+  if (a) {
+    // Wild cards
+    document.getElementById("player-name-wild").textContent = a.name;
+    document.getElementById("player-hp-meter-wild").textContent = makeBar(a.curHp, a.maxHp);
+    document.getElementById("player-hp-num-wild").textContent = `${a.curHp}/${a.maxHp}`;
+    document.getElementById("player-sta-meter-wild").textContent = makeBar(a.curSta, a.maxSta);
+    document.getElementById("player-sta-num-wild").textContent = `${a.curSta}/${a.maxSta}`;
+    document.getElementById("player-car-wild").textContent = a.car + a.fortified;
+    document.getElementById("player-tox-wild").textContent = a.tox;
+    document.getElementById("player-agi-wild").textContent = a.agi;
+
+    // Arena cards
+    document.getElementById("player-name-arena").textContent = a.name;
+    document.getElementById("player-hp-meter-arena").textContent = makeBar(a.curHp, a.maxHp);
+    document.getElementById("player-hp-num-arena").textContent = `${a.curHp}/${a.maxHp}`;
+    document.getElementById("player-sta-meter-arena").textContent = makeBar(a.curSta, a.maxSta);
+    document.getElementById("player-sta-num-arena").textContent = `${a.curSta}/${a.maxSta}`;
+    document.getElementById("player-car-arena").textContent = a.car + a.fortified;
+    document.getElementById("player-tox-arena").textContent = a.tox;
+    document.getElementById("player-agi-arena").textContent = a.agi;
+  }
+
+  // Enemy wild card
+  const w = state.wild;
+  if (w && state.inCombat && state.combatMode === 'wild') {
+    document.getElementById("enemy-name-wild").textContent = `[T${w.tier}] WILD ${w.name}`;
+    document.getElementById("enemy-hp-meter-wild").textContent = makeBar(w.curHp, w.maxHp);
+    document.getElementById("enemy-hp-num-wild").textContent = `${w.curHp}/${w.maxHp}`;
+    document.getElementById("enemy-sta-meter-wild").textContent = makeBar(w.curSta, w.maxSta);
+    document.getElementById("enemy-sta-num-wild").textContent = `${w.curSta}/${w.maxSta}`;
+    document.getElementById("enemy-car-wild").textContent = w.car + w.fortified;
+    document.getElementById("enemy-tox-wild").textContent = w.tox;
+    document.getElementById("enemy-agi-wild").textContent = w.agi;
+  } else {
+    document.getElementById("enemy-name-wild").textContent = "NO TARGET";
+    document.getElementById("enemy-hp-meter-wild").textContent = "[----------]";
+    document.getElementById("enemy-hp-num-wild").textContent = "0/0";
+    document.getElementById("enemy-sta-meter-wild").textContent = "[----------]";
+    document.getElementById("enemy-sta-num-wild").textContent = "0/0";
+    document.getElementById("enemy-car-wild").textContent = "0";
+    document.getElementById("enemy-tox-wild").textContent = "0";
+    document.getElementById("enemy-agi-wild").textContent = "0";
+  }
+
+  // Arena enemy card
+  const opp = state.arenaOpponent;
+  if (opp && state.inCombat && state.combatMode === 'arena') {
+    document.getElementById("enemy-name-arena").textContent = opp.name;
+    document.getElementById("enemy-hp-meter-arena").textContent = makeBar(opp.curHp, opp.maxHp);
+    document.getElementById("enemy-hp-num-arena").textContent = `${opp.curHp}/${opp.maxHp}`;
+    document.getElementById("enemy-sta-meter-arena").textContent = makeBar(opp.curSta, opp.maxSta);
+    document.getElementById("enemy-sta-num-arena").textContent = `${opp.curSta}/${opp.maxSta}`;
+    document.getElementById("enemy-car-arena").textContent = opp.car + opp.fortified;
+    document.getElementById("enemy-tox-arena").textContent = opp.tox;
+    document.getElementById("enemy-agi-arena").textContent = opp.agi;
+  }
+}
+
+// --- BUTTON ROUTER FOR THE WILD ---
+function handleWildBtn(num) {
+  if (!state.inCombat) {
+    if (num === 1) startForage();
+    else if (num === 2) restActiveUnit();
+    else if (num === 3) buyItem('jar', 5);
+    else if (num === 4) cycleFighter();
+  } else {
+    handleCombatAction(num);
+  }
+}
+
+function restActiveUnit() {
+  if (state.active.curHp === state.active.maxHp && state.active.curSta === state.active.maxSta) {
+    writeLog("Active specimen is already fully rested.");
+    return;
+  }
+  state.active.curHp = state.active.maxHp;
+  state.active.curSta = state.active.maxSta;
+  state.active.venomTicks = 0;
+  state.active.fortified = 0;
+  writeLog(`${state.active.name} rested. Vitals restored.`, "success");
+  updateUI();
+}
+
+function cycleFighter() {
+  if (state.roster.length <= 1) {
+    writeLog("Only 1 specimen in roster. Capture more in the field.", "info");
+    return;
+  }
+  const curIdx = state.roster.indexOf(state.active);
+  const nextIdx = (curIdx + 1) % state.roster.length;
+  state.active = state.roster[nextIdx];
+  state.active.fortified = 0;
+  state.active.venomTicks = 0;
+  writeLog(`Active combatant swapped to: ${state.active.name}.`, "info");
+  updateUI();
+}
+
+// --- THE WILD: FORAGING & SPAWNS ---
+function rollTier() {
+  if (state.lures > 0) {
+    state.lures--;
+    writeLog("Pheromone lure dissipated! Attracted high-tier fauna.", "alert");
+    const roll = Math.random() * 100;
+    if (roll < 4) return 6;
+    if (roll < 20) return 5;
+    if (roll < 55) return 4;
+    return 3;
+  }
+  const roll = Math.random() * 100;
+  if (roll < 0.6) return 6;
+  if (roll < 3.5) return 5;
+  if (roll < 12.0) return 4;
+  if (roll < 28.0) return 3;
+  if (roll < 60.0) return 2;
+  return 1;
+}
+
+function startForage() {
+  if (state.active.curHp <= 0) {
+    writeLog("Active specimen is incapacitated! Heal or cycle roster first.", "crit");
+    return;
+  }
+
+  const targetTier = rollTier();
+  const pool = SPECIES_DB.filter(s => s.tier === targetTier);
+  const tmpl = pool[Math.floor(Math.random() * pool.length)];
+  
+  state.wild = createUnit(tmpl);
+  state.discovered[tmpl.name] = true;
+
+  const prefix = `[T${tmpl.tier}]`;
+  writeLog(`--- WILD CLASH ENGAGED ---`, "info");
+  if (tmpl.tier >= 6) writeLog(`CRITICALLY ENDANGERED RELIC: ${prefix} ${tmpl.name} has emerged!`, "legendary");
+  else if (tmpl.tier >= 5) writeLog(`APEX PREDATOR: ${prefix} ${tmpl.name} stalked into view!`, "crit");
+  else if (tmpl.tier >= 3) writeLog(`WARNING: Venomous ${prefix} ${tmpl.name} sighted in litter.`, "alert");
+  else writeLog(`Discovered ${prefix} ${tmpl.name} under rotting tree bark.`, "normal");
+
+  setCombatMode('wild');
+}
+
+// --- STAT-SCALED COMBAT ENGINE ---
+function calculateDamage(attacker, defender, basePower) {
+  // Stat scaling: Agility gives slight precision damage, Carapace mitigates asymptotically
+  const rawDmg = basePower + Math.floor(attacker.agi * 0.35);
+  const effectiveCar = defender.car + defender.fortified;
+  const mitigation = 100 / (100 + (effectiveCar * 6));
+  return Math.max(1, Math.round(rawDmg * mitigation));
+}
+
+function checkDodge(attacker, defender) {
+  const agiDiff = defender.agi - attacker.agi;
+  const dodgeChance = Math.max(0.03, Math.min(0.40, 0.05 + (agiDiff * 0.02)));
+  return Math.random() < dodgeChance;
+}
+
+function handleCombatAction(num) {
+  const p = state.active;
+  const w = state.wild;
+
+  if (num === 1) {
+    if (checkDodge(p, w)) {
+      writeLog(`Wild ${w.name} swiftly dodged your strike!`, "alert");
+    } else {
+      let dmg = calculateDamage(p, w, 7 + Math.floor(Math.random() * 4));
+      w.curHp = Math.max(0, w.curHp - dmg);
+      p.curSta = Math.min(p.maxSta, p.curSta + 5);
+      writeLog(`${p.name} strikes with mandibles for ${dmg} damage.`);
+    }
+  } 
+  else if (num === 2) {
+    if (p.curSta < 15) { writeLog("Stamina depleted!", "crit"); return; }
+    if (p.tox === 0) { writeLog(`${p.name} has no venom glands!`, "crit"); return; }
+    p.curSta -= 15;
+    let baseDmg = calculateDamage(p, w, 4 + p.tox);
+    w.curHp = Math.max(0, w.curHp - baseDmg);
+    w.venomTicks += 2;
+    writeLog(`${p.name} injects toxins! Inflicted ${baseDmg} direct dmg and necrotic poison.`, "alert");
+  } 
+  else if (num === 3) {
+    if (p.curSta < 10) { writeLog("Stamina depleted!", "crit"); return; }
+    p.curSta -= 10;
+    const fortGain = Math.max(3, Math.round(p.car * 0.3));
+    p.fortified += fortGain;
+    writeLog(`${p.name} fortified chitin plates (+${fortGain} Carapace this match).`, "info");
+  } 
+  else if (num === 4) {
+    let isPro = state.proJars > 0;
+    if (!isPro && state.jars <= 0) {
+      writeLog("No capture containers left in pack!", "crit");
+      return;
+    }
+    
+    if (isPro) state.proJars--;
+    else state.jars--;
+
+    let hpRatio = w.curHp / w.maxHp;
+    let escapeRisk = (hpRatio * 0.50) + (w.tier * 0.08) - (isPro ? 0.30 : 0.0);
+
+    if (Math.random() > escapeRisk) {
+      writeLog(`SUCCESS! Captured [T${w.tier}] ${w.name}!`, "success");
+      w.name = `[T${w.tier}] ${w.name}`;
+      w.curHp = w.maxHp;
+      w.fortified = 0;
+      w.venomTicks = 0;
+      state.roster.push(w);
+
+      const bounty = Math.round(6 * Math.pow(2.1, w.tier - 1));
+      state.pith += bounty;
+      writeLog(`Harvested ${bounty} Pith research grant.`, "success");
+      setExploreMode();
+      return;
+    } else {
+      writeLog(`FAILED! [T${w.tier}] ${w.name} broke free from container!`, "crit");
+    }
+  }
+
+  // Check Wild Defeat
+  if (w.curHp <= 0) {
+    const bounty = Math.round(6 * Math.pow(2.1, w.tier - 1));
+    state.pith += bounty;
+    writeLog(`Wild [T${w.tier}] ${w.name} collapsed! Earned ${bounty} Pith.`, "success");
+    setExploreMode();
+    return;
+  }
+
+  // Enemy retaliation
+  enemyWildTurn();
+  updateUI();
+}
+
+function enemyWildTurn() {
+  const p = state.active;
+  const w = state.wild;
+
+  // Venom DoT
+  if (w.venomTicks > 0) {
+    const dot = Math.max(2, Math.round(w.tox * 0.75 + 2));
+    w.curHp = Math.max(0, w.curHp - dot);
+    w.venomTicks--;
+    writeLog(`Venom necrosis burns wild ${w.name} for ${dot} dmg.`, "alert");
+    if (w.curHp <= 0) {
+      const bounty = Math.round(6 * Math.pow(2.1, w.tier - 1));
+      state.pith += bounty;
+      writeLog(`Wild [T${w.tier}] ${w.name} succumbed to venom! Earned ${bounty} Pith.`, "success");
+      setExploreMode();
+      return;
+    }
+  }
+
+  // Enemy attack
+  if (checkDodge(w, p)) {
+    writeLog(`${p.name} skillfully dodged the wild creature's attack!`, "success");
+    return;
+  }
+
+  if (w.tox > 0 && Math.random() < 0.45 && w.curSta >= 15) {
+    w.curSta -= 15;
+    let dmg = calculateDamage(w, p, 3 + w.tox);
+    p.curHp = Math.max(0, p.curHp - dmg);
+    writeLog(`Wild ${w.name} strikes with venom for ${dmg} dmg!`, "crit");
+  } else {
+    let dmg = calculateDamage(w, p, 6 + Math.floor(Math.random() * 3));
+    p.curHp = Math.max(0, p.curHp - dmg);
+    w.curSta = Math.min(w.maxSta, w.curSta + 5);
+    writeLog(`Wild ${w.name} bites back for ${dmg} dmg.`);
+  }
+
+  if (p.curHp <= 0) {
+    writeLog(`${p.name} was incapacitated! You retreated back to camp.`, "crit");
+    p.curHp = 0;
+    setExploreMode();
+  }
+}
+
+// --- THE ARENA: GLADIATOR COLOSSEUM ---
+function enterArena(division) {
+  if (state.active.curHp <= 0) {
+    writeLog("Active combatant is incapacitated! Restore health in Vivarium first.", "crit");
+    return;
+  }
+
+  const fee = division === 1 ? 20 : (division === 2 ? 60 : 180);
+  if (state.pith < fee) {
+    writeLog(`Insufficient Pith! Circuit entry fee requires ${fee} Pith.`, "crit");
+    return;
+  }
+
+  state.pith -= fee;
+  state.arenaDivision = division;
+
+  // Select opponent tier pool
+  let minTier = division === 1 ? 1 : (division === 2 ? 3 : 5);
+  let maxTier = division === 1 ? 2 : (division === 2 ? 4 : 6);
+  const pool = SPECIES_DB.filter(s => s.tier >= minTier && s.tier <= maxTier);
+  const template = pool[Math.floor(Math.random() * pool.length)];
+
+  // Scale gladiator opponent stats (+20% to +50%)
+  const scale = 1.2 + (division * 0.15);
+  const arenaOpponent = {
+    ...template,
+    hp: Math.round(template.hp * scale),
+    sta: Math.round(template.sta * scale),
+    car: Math.round(template.car * scale),
+    tox: template.tox > 0 ? Math.round(template.tox * scale) : 0,
+    agi: Math.round(template.agi * scale),
+  };
+
+  const oppUnit = createUnit(arenaOpponent);
+  oppUnit.name = `[GLADIATOR] [T${template.tier}] ${template.name}`;
+  state.arenaOpponent = oppUnit;
+  state.discovered[template.name] = true;
+
+  writeLog(`--- ENTERED ARENA CIRCUIT (DIVISION ${division}) ---`, "gold");
+  writeLog(`CHALLENGER: ${oppUnit.name} enters the colosseum sand!`, "crit");
+
+  setCombatMode('arena');
+}
+
+function handleArenaCombat(action) {
+  const p = state.active;
+  const opp = state.arenaOpponent;
+
+  if (action === 1) { // Standard strike
+    if (checkDodge(p, opp)) {
+      writeLog(`Gladiator ${opp.name} rolled under your strike!`, "alert");
+    } else {
+      let dmg = calculateDamage(p, opp, 8 + Math.floor(Math.random() * 4));
+      opp.curHp = Math.max(0, opp.curHp - dmg);
+      p.curSta = Math.min(p.maxSta, p.curSta + 5);
+      writeLog(`${p.name} strikes gladiator for ${dmg} damage.`);
+    }
+  }
+  else if (action === 2) { // Venom
+    if (p.curSta < 15) { writeLog("Stamina depleted!", "crit"); return; }
+    if (p.tox === 0) { writeLog(`${p.name} lacks venom apparatus!`, "crit"); return; }
+    p.curSta -= 15;
+    let baseDmg = calculateDamage(p, opp, 5 + p.tox);
+    opp.curHp = Math.max(0, opp.curHp - baseDmg);
+    opp.venomTicks += 2;
+    writeLog(`${p.name} injects concentrated venom! Inflicted ${baseDmg} dmg and poison DoT.`, "alert");
+  }
+  else if (action === 3) { // Fortify
+    if (p.curSta < 10) { writeLog("Stamina depleted!", "crit"); return; }
+    p.curSta -= 10;
+    const gain = Math.max(4, Math.round(p.car * 0.35));
+    p.fortified += gain;
+    writeLog(`${p.name} braces carapace (+${gain} Carapace).`, "info");
+  }
+  else if (action === 4) { // Adrenal Burst (1.8x heavy strike)
+    if (p.curSta < 25) { writeLog("Requires 25 Stamina for Adrenal Burst!", "crit"); return; }
+    p.curSta -= 25;
+    if (checkDodge(p, opp)) {
+      writeLog(`Gladiator evaded your Adrenal Burst!`, "crit");
+    } else {
+      let dmg = Math.round(calculateDamage(p, opp, 16 + Math.floor(Math.random() * 6)) * 1.8);
+      opp.curHp = Math.max(0, opp.curHp - dmg);
+      writeLog(`CRITICAL ADRENAL BURST! ${p.name} smashes for ${dmg} massive damage!`, "gold");
+    }
+  }
+
+  // Check Arena Victory
+  if (opp.curHp <= 0) {
+    const purse = state.arenaDivision === 1 ? 80 : (state.arenaDivision === 2 ? 240 : 750);
+    state.pith += purse;
+
+    // GENERATE CHAMPION TROPHY BUG (+50% to +500% BOOST)
+    const minBoost = state.arenaDivision === 1 ? 50 : (state.arenaDivision === 2 ? 100 : 200);
+    const maxBoost = state.arenaDivision === 1 ? 150 : (state.arenaDivision === 2 ? 300 : 500);
+    const buffPct = Math.floor(Math.random() * (maxBoost - minBoost + 1)) + minBoost;
+    const buffMult = 1 + (buffPct / 100);
+
+    // Pick a real species for the trophy
+    const trophyTmpl = SPECIES_DB[Math.floor(Math.random() * SPECIES_DB.length)];
+    const trophyBug = {
+      ...trophyTmpl,
+      hp: Math.round(trophyTmpl.hp * buffMult),
+      sta: Math.round(trophyTmpl.sta * buffMult),
+      car: Math.round(trophyTmpl.car * buffMult),
+      tox: trophyTmpl.tox > 0 ? Math.round(trophyTmpl.tox * buffMult) : 0,
+      agi: Math.round(trophyTmpl.agi * buffMult),
+      isChampion: true,
+      buff: buffPct
+    };
+
+    const trophyUnit = createUnit(trophyBug);
+    trophyUnit.name = `[CHAMPION +${buffPct}%] [T${trophyTmpl.tier}] ${trophyTmpl.name}`;
+    state.roster.push(trophyUnit);
+    state.discovered[trophyTmpl.name] = true;
+
+    writeLog(`ARENA VICTORY! Cleared division and claimed ${purse} Pith!`, "gold");
+    writeLog(`CROWD AWARD: Conferred Trophy Specimen: ${trophyUnit.name}!`, "legendary");
+    writeLog(`STAT METRICS: HP:${trophyUnit.hp} STA:${trophyUnit.sta} CAR:${trophyUnit.car} TOX:${trophyUnit.tox} AGI:${trophyUnit.agi}`, "info");
+
+    setExploreMode();
+    return;
+  }
+
+  // Arena Opponent Turn
+  enemyArenaTurn();
+  updateUI();
+}
+
+function enemyArenaTurn() {
+  const p = state.active;
+  const opp = state.arenaOpponent;
+
+  if (opp.venomTicks > 0) {
+    const dot = Math.max(3, Math.round(opp.tox * 0.8 + 2));
+    opp.curHp = Math.max(0, opp.curHp - dot);
+    opp.venomTicks--;
+    writeLog(`Venom seeps into gladiator for ${dot} dmg.`, "alert");
+    if (opp.curHp <= 0) {
+      handleArenaCombat(1); // Trigger victory check
+      return;
+    }
+  }
+
+  if (checkDodge(opp, p)) {
+    writeLog(`You evaded the gladiator's ferocious assault!`, "success");
+    return;
+  }
+
+  if (opp.tox > 0 && Math.random() < 0.45 && opp.curSta >= 15) {
+    opp.curSta -= 15;
+    let dmg = calculateDamage(opp, p, 5 + opp.tox);
+    p.curHp = Math.max(0, p.curHp - dmg);
+    writeLog(`Gladiator ${opp.name} injects deadly poison for ${dmg} dmg!`, "crit");
+  } else {
+    let dmg = calculateDamage(opp, p, 8 + Math.floor(Math.random() * 4));
+    p.curHp = Math.max(0, p.curHp - dmg);
+    opp.curSta = Math.min(opp.maxSta, opp.curSta + 5);
+    writeLog(`Gladiator ${opp.name} strikes for ${dmg} dmg.`);
+  }
+
+  if (p.curHp <= 0) {
+    writeLog(`DEFEAT IN THE COLOSSEUM! ${p.name} collapsed on the sands.`, "crit");
+    p.curHp = 0;
+    setExploreMode();
+  }
+}
+
+// --- COVETED CARAPACE SPAWN (PURE STAT BUFF GENERATOR) ---
+function spawnCovetedCarapace() {
+  const select = document.getElementById("forge-select");
+  const choice = select.value;
+
+  let template;
+  if (choice === "RANDOM") {
+    template = SPECIES_DB[Math.floor(Math.random() * SPECIES_DB.length)];
+  } else {
+    template = SPECIES_DB.find(s => s.name === choice);
+  }
+
+  if (!template) return;
+
+  const buffPct = Math.floor(Math.random() * 76) + 25; // +25% to +100%
+  const buffMult = 1 + (buffPct / 100);
+
+  const specimen = {
+    ...template,
+    hp: Math.round(template.hp * buffMult),
+    sta: Math.round(template.sta * buffMult),
+    car: Math.round(template.car * buffMult),
+    tox: template.tox > 0 ? Math.round(template.tox * buffMult) : 0,
+    agi: Math.round(template.agi * buffMult),
+    coveted: true,
+    buff: buffPct
+  };
+
+  const covetedUnit = createUnit(specimen);
+  covetedUnit.name = `[COVETED +${buffPct}%] [T${template.tier}] ${template.name}`;
+
+  state.roster.push(covetedUnit);
+  state.active = covetedUnit;
+  state.discovered[template.name] = true;
+
+  writeLog(`COVETED CARAPACE SPAWNED: ${covetedUnit.name}!`, "legendary");
+  writeLog(`ATTRIBUTES: HP:${covetedUnit.hp} STA:${covetedUnit.sta} CAR:${covetedUnit.car} TOX:${covetedUnit.tox} AGI:${covetedUnit.agi}`, "info");
+
+  renderVivarium();
+  updateUI();
+}
+
+// --- VIVARIUM SORTING & ROSTER MANAGEMENT ---
+function setSortMode(mode) {
+  state.sortMode = mode;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('sort-' + mode);
+  if (btn) btn.classList.add('active');
+  renderVivarium();
+}
+
+function renderVivarium() {
+  const list = document.getElementById("vivarium-list");
+  list.innerHTML = "";
+
+  // Sort roster dynamically
+  let sorted = [...state.roster];
+  if (state.sortMode === 'value') {
+    sorted.sort((a, b) => getSpecimenValue(b) - getSpecimenValue(a));
+  } else if (state.sortMode === 'tier') {
+    sorted.sort((a, b) => (b.tier || 1) - (a.tier || 1));
+  } else if (state.sortMode === 'stats') {
+    sorted.sort((a, b) => getSpecimenTotalStats(b) - getSpecimenTotalStats(a));
+  } else if (state.sortMode === 'name') {
+    sorted.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  sorted.forEach((unit) => {
+    const isAct = unit === state.active;
+    const val = getSpecimenValue(unit);
+    const totStats = getSpecimenTotalStats(unit);
+    const div = document.createElement("div");
+    div.className = `specimen-list-item ${isAct ? 'selected' : ''}`;
+    div.innerHTML = `
+      <div>
+        <strong style="color:${unit.isChampion ? 'var(--gold)' : (unit.coveted ? 'var(--purple)' : 'var(--text)')};">${unit.name}</strong> 
+        ${isAct ? '<span style="color:var(--cyan);">[ACTIVE]</span>' : ''}
+        <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">
+          VAL: <span style="color:var(--gold); font-weight:bold;">${val} P</span> | STATS: ${totStats} (HP:${unit.curHp}/${unit.maxHp} STA:${unit.curSta}/${unit.maxSta} CAR:${unit.car} TOX:${unit.tox} AGI:${unit.agi})
+        </div>
+      </div>
+      <div class="item-actions">
+        ${!isAct ? `<button class="mini-btn" onclick="makeActiveByRef('${unit.name}', ${unit.maxHp},${unit.car})">DEPLOY</button>` : ''}
+        <button class="mini-btn" onclick="healUnitByRef('${unit.name}', ${unit.maxHp})">HEAL (2P)</button>
+        ${state.roster.length > 1 ? `<button class="mini-btn" style="color:var(--red);" onclick="sellUnitByRef('${unit.name}', ${val})">SELL (+${val}P)</button>` : ''}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function makeActiveByRef(name, maxHp, car) {
+  const u = state.roster.find(r => r.name === name && r.maxHp === maxHp && r.car === car);
+  if (u) {
+    state.active = u;
+    writeLog(`Deployed ${state.active.name} as primary combatant.`, "info");
+    renderVivarium();
+    updateUI();
+  }
+}
+
+function healUnitByRef(name, maxHp) {
+  const u = state.roster.find(r => r.name === name && r.maxHp === maxHp);
+  if (!u) return;
+  if (u.curHp === u.maxHp && u.curSta === u.maxSta) {
+    writeLog(`${u.name} already at peak condition.`);
+    return;
+  }
+  if (state.pith < 2) {
+    writeLog("Insufficient Pith (requires 2).", "crit");
+    return;
+  }
+  state.pith -= 2;
+  u.curHp = u.maxHp;
+  u.curSta = u.maxSta;
+  writeLog(`${u.name} restored to full health.`, "success");
+  renderVivarium();
+  updateUI();
+}
+
+function sellUnitByRef(name, val) {
+  if (state.roster.length <= 1) {
+    writeLog("Cannot sell your last remaining combatant!", "crit");
+    return;
+  }
+  const idx = state.roster.findIndex(r => r.name === name);
+  if (idx !== -1) {
+    const u = state.roster[idx];
+    state.pith += val;
+    state.roster.splice(idx, 1);
+    if (u === state.active) state.active = state.roster[0];
+    writeLog(`Sold ${u.name} to biological lab for ${val} Pith.`, "gold");
+    renderVivarium();
+    updateUI();
+  }
+}
+
+function restAllSpecimens() {
+  if (state.pith < 15) {
+    writeLog("Requires 15 Pith to treat entire vivarium.", "crit");
+    return;
+  }
+  state.pith -= 15;
+  state.roster.forEach(u => {
+    u.curHp = u.maxHp;
+    u.curSta = u.maxSta;
+  });
+  writeLog("Treated vivarium collection with nutrient mist. All vitals restored.", "success");
+  renderVivarium();
+  updateUI();
+}
+
+// --- DEPOT SHOP ---
+function buyItem(type, cost) {
+  if (state.pith < cost) {
+    writeLog(`Insufficient Pith. Requires ${cost} Pith.`, "crit");
+    return;
+  }
+  state.pith -= cost;
+  if (type === 'jar') {
+    state.jars++;
+    writeLog(`Purchased Standard Specimen Jar.`, "info");
+  } else if (type === 'proJar') {
+    state.proJars++;
+    writeLog(`Purchased Acrylic Trap Canister (+30% catch rate).`, "info");
+  } else if (type === 'lure') {
+    state.lures++;
+    writeLog(`Purchased Pheromone Bait Vial.`, "info");
+  } else if (type === 'bedding') {
+    state.roster.forEach(u => { u.curHp = u.maxHp; u.curSta = u.maxSta; });
+    writeLog(`Installed Sphagnum Mulch Bedding. All specimens healed!`, "success");
+  }
+  updateUI();
+}
+
+// --- BESTIARY FIELD GUIDE (310+ ENTRIES) ---
+function renderBestiary() {
+  const container = document.getElementById("bestiary-list");
+  container.innerHTML = "";
+  
+  const discoveredCount = Object.keys(state.discovered).length;
+  document.getElementById("bestiary-progress").textContent = `CATALOGED: ${discoveredCount} / ${SPECIES_DB.length}`;
+
+  for (let t = 1; t <= 6; t++) {
+    const tierDiv = document.createElement("div");
+    tierDiv.className = "tier-hdr";
+    const tierPool = SPECIES_DB.filter(s => s.tier === t);
+    tierDiv.textContent = `TIER ${t} SPECIES (${tierPool.length} TOTAL)`;
+    container.appendChild(tierDiv);
+
+    tierPool.forEach(s => {
+      const isKnown = !!state.discovered[s.name];
+      const row = document.createElement("div");
+      row.className = "bestiary-row";
+      if (isKnown) {
+        row.innerHTML = `
+          <span style="color:var(--text); font-weight:bold;">${s.name}</span>
+          <span style="color:var(--text-dim);">HP:${s.hp} STA:${s.sta} CAR:${s.car} TOX:${s.tox} AGI:${s.agi}</span>
+        `;
+      } else {
+        row.innerHTML = `
+          <span style="color:var(--text-dim);">??? [UNDISCOVERED]</span>
+          <span style="color:var(--text-dim);">-- -- --</span>
+        `;
+      }
+      container.appendChild(row);
+    });
+  }
+}
+
+// Ignition
+init();
+</script>
+</body>
+</html>
